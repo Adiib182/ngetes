@@ -4,8 +4,14 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Sistem Keuangan - Titik Pulang Sawangan</title>
+<!-- Bootstrap & ChartJS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- Tambahan JQuery & Select2 untuk Dropdown Search -->
+<script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
 <style>
 :root {
   --primary-color: #1e3a8a;
@@ -43,17 +49,15 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 .btn-upgrade { padding: 10px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s ease; }
 .btn-upgrade:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
 
-/* Efek placeholder untuk datalist agar nampak lebih jelas */
-input[list]::-webkit-calendar-picker-indicator {
-  cursor: pointer; opacity: 0.6; transition: 0.2s;
-}
-input[list]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
+/* Kustomisasi Tampilan Select2 (Dropdown Search) Agar Senada dengan Bootstrap */
+.select2-container .select2-selection--single { height: 42px; border: 1px solid #cbd5e1; border-radius: 8px; padding: 6px 14px; background-color: #fff; }
+.select2-container--default .select2-selection--single .select2-selection__arrow { top: 7px; right: 10px; }
+.select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 28px; color: #334155; padding-left: 0; }
+.select2-search__field { outline: none !important; border-radius: 4px; }
+.select2-dropdown { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
 </style>
 </head>
 <body>
-
-<datalist id="datalistMasterBlok"></datalist>
-
 <div class="app-header">
 <div class="logo-container">🏡📈</div>
 <h3>Sistem Kas & IPL Warga</h3>
@@ -66,6 +70,7 @@ input[list]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
 <li class="nav-item"><button class="nav-link" id="tabPolling" onclick="bukaHalaman('polling')">Polling 🗳️</button></li>
 <li class="nav-item"><button class="nav-link" id="tabAdmin" onclick="bukaHalaman('admin')">Admin 🔒</button></li>
 </ul>
+
 <div id="halamanDashboard" class="card-custom">
 <h5 class="fw-bold mb-3 text-dark text-center">Grafik Keuangan Lingkungan</h5>
 <div class="row g-2 mb-3">
@@ -134,6 +139,7 @@ input[list]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
 <div id="paginasiKeluar" class="d-flex justify-content-end gap-1 mb-2"></div>
 </div>
 </div>
+
 <div id="halamanWarga" class="card-custom hidden">
 <div class="d-flex justify-content-center gap-2 mb-4">
 <button class="btn btn-sm btn-outline-primary active w-50 fw-bold" id="btnSubBayar" onclick="bukaSubWarga('bayar')">Konfirmasi Bayar</button>
@@ -143,14 +149,18 @@ input[list]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
 <h5 class="text-center fw-bold mb-3 text-dark">Kirim Konfirmasi Pembayaran</h5>
 <form id="formIuran">
 
+<!-- MODIFIKASI DROPDOWN BAYAR: Dropdown asli dengan fitur pencarian (Select2) -->
 <div class="mb-3">
 <label class="form-label">No. Rumah / Blok</label>
-<input type="text" class="form-control border-primary" list="datalistMasterBlok" name="blok" id="blokWargaIuran" onchange="isiOtomatisNama(this.value, 'namaWargaIuran')" placeholder="Ketik Blok untuk mencari..." required autocomplete="off">
+<select class="form-control" name="blok" id="blokWargaIuran" required>
+  <option value="">-- Memuat Data Blok... --</option>
+</select>
 </div>
 <div class="mb-3">
 <label class="form-label">Nama</label>
-<input type="text" class="form-control bg-light" id="namaWargaIuran" name="nama" readonly required placeholder="Otomatis terisi setelah blok valid">
+<input type="text" class="form-control bg-light" id="namaWargaIuran" name="nama" readonly required placeholder="Otomatis terisi setelah pilih blok">
 </div>
+
 <div class="row g-2 mb-3">
 <div class="col-7">
 <label class="form-label">Iuran Bulan</label>
@@ -173,10 +183,17 @@ input[list]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
 
 <div id="subWargaCek" class="hidden">
 <h5 class="text-center fw-bold mb-3 text-dark">Cek Status Iuran Rumah</h5>
-<div class="input-group mb-3">
-<input type="text" class="form-control" list="datalistMasterBlok" id="blokCekMandiri" placeholder="Ketik & Cari Nomor Rumah..." autocomplete="off">
-<button class="btn btn-primary fw-bold" type="button" id="btnProsesCek" onclick="prosesCekMandiriWarga()">Cari Data</button>
+
+<!-- MODIFIKASI DROPDOWN CEK TUNGGAKAN -->
+<div class="d-flex gap-2 mb-3">
+  <div class="flex-grow-1">
+    <select class="form-control" id="blokCekMandiri">
+      <option value="">-- Memuat Data Blok... --</option>
+    </select>
+  </div>
+  <button class="btn btn-primary fw-bold" type="button" id="btnProsesCek" onclick="prosesCekMandiriWarga()">Cari Data</button>
 </div>
+
 <div id="loadingCekWarga" class="text-center text-muted my-3" style="display:none;">Mencari data...</div>
 <div id="hasilCekMandiri" class="box-hasil-cek hidden">
 <h6 class="border-bottom pb-2 fw-bold">Hasil Analisis Blok: <span id="resBlokWarga" class="text-primary">-</span></h6>
@@ -355,32 +372,38 @@ window.onload = function() {
 };
 
 // ==============================================================
-// FITUR BARU: AUTOCOMPLETE & AUTOFILL DARI DATALIST
+// FUNGSI INISIASI SELECT2 (DROPDOWN SEARCH)
 // ==============================================================
 async function fetchMasterWarga() {
   try {
     masterWargaGlobal = await apiGet('ambilMasterWarga');
-    populateBlokDatalist();
+    populateBlokDropdowns();
   } catch(e) { console.error("Gagal mengambil master warga", e); }
 }
 
-function populateBlokDatalist() {
-  let optionsHtml = '';
+function populateBlokDropdowns() {
+  let optionsHtml = '<option value="">-- Pilih / Ketik Blok --</option>';
   masterWargaGlobal.forEach(w => {
-    optionsHtml += `<option value="${w.blok}">`;
+    optionsHtml += `<option value="${w.blok}" data-nama="${w.nama}">${w.blok}</option>`;
   });
-  let dl = document.getElementById('datalistMasterBlok');
-  if(dl) dl.innerHTML = optionsHtml;
-}
-
-function isiOtomatisNama(blokValue, targetId) {
-  let target = document.getElementById(targetId);
-  if(!target) return;
-  if(!blokValue) { target.value = ''; return; }
   
-  // Cari di database lokal secara case-insensitive
-  let dataWarga = masterWargaGlobal.find(w => w.blok.toUpperCase() === blokValue.trim().toUpperCase());
-  target.value = dataWarga ? (dataWarga.nama || '') : '';
+  // Setup Form Iuran
+  let selIuran = $('#blokWargaIuran');
+  if(selIuran.length) { 
+      selIuran.html(optionsHtml); 
+      selIuran.select2({ width: '100%' }); // Aktifkan library Select2
+      selIuran.on('change', function() {
+          let namaTerpilih = $(this).find(':selected').data('nama');
+          $('#namaWargaIuran').val(namaTerpilih || '');
+      });
+  }
+  
+  // Setup Form Cek Mandiri
+  let selCek = $('#blokCekMandiri');
+  if(selCek.length) { 
+      selCek.html(optionsHtml); 
+      selCek.select2({ width: '100%' }); // Aktifkan library Select2
+  }
 }
 
 function renderPaginasi(containerId, totalData, currentPage, callbackName) {
@@ -537,16 +560,10 @@ document.getElementById('formPengeluaran').addEventListener('submit', async func
 });
 
 async function prosesCekMandiriWarga() {
-  const blokInput = document.getElementById('blokCekMandiri').value;
+  const blokInput = $('#blokCekMandiri').val(); // Pakai jquery val
   const loading = document.getElementById('loadingCekWarga'), hasilBox = document.getElementById('hasilCekMandiri');
-  if(!blokInput.trim()) { alert("Silakan ketik atau pilih Nomor Rumah!"); return; }
+  if(!blokInput) { alert("Silakan pilih/ketik Nomor Rumah!"); return; }
   
-  // Validasi ketat jika data tidak ada di master list
-  const cekAda = masterWargaGlobal.find(w => w.blok.toUpperCase() === blokInput.trim().toUpperCase());
-  if(!cekAda) {
-      alert("Blok yang Anda cari tidak ada di sistem. Silakan pilih dari daftar."); return;
-  }
-
   loading.style.display = "block"; hasilBox.classList.add('hidden');
   try {
     const res = await apiGet('cekTunggakanWargaMandiiri', { blokInput: blokInput });
@@ -582,13 +599,8 @@ document.getElementById('formIuran').addEventListener('submit', function(e) {
   e.preventDefault();
   const submitBtn = document.getElementById('submitBtn'), pesanDiv = document.getElementById('pesanWarga');
   
-  // Validasi ketat Datalist agar tidak salah blok
-  const blokInput = document.getElementsByName('blok')[0].value.trim().toUpperCase();
-  const cekAda = masterWargaGlobal.find(w => w.blok.toUpperCase() === blokInput);
-  if (!cekAda) {
-      alert("Blok yang Anda masukkan tidak valid. Silakan pilih kembali dari daftar.");
-      return;
-  }
+  const blokValue = $('#blokWargaIuran').val();
+  if(!blokValue) { alert("Silakan pilih Blok Rumah terlebih dahulu."); return; }
 
   submitBtn.disabled = true; submitBtn.innerText = "Sedang Mengirim...";
   const file = document.getElementById('fileInput').files[0];
@@ -596,8 +608,8 @@ document.getElementById('formIuran').addEventListener('submit', function(e) {
     const reader = new FileReader();
     reader.onload = async function(ev) {
       const formData = {
-        nama: document.getElementsByName('nama')[0].value,
-        blok: document.getElementsByName('blok')[0].value,
+        nama: document.getElementById('namaWargaIuran').value,
+        blok: blokValue,
         bulan: "'" + document.getElementById('bulanWarga').value + " " + document.getElementById('tahunWarga').value,
         jumlah: document.getElementById('jumlahInput').value.replace(/[^0-9]/g, ''),
         buktiTf: ev.target.result
@@ -606,6 +618,7 @@ document.getElementById('formIuran').addEventListener('submit', function(e) {
         const respon = await apiPost('prosesPembayaran', { dataForm: formData });
         pesanDiv.className = "alert alert-success mt-3"; pesanDiv.innerText = respon; pesanDiv.style.display = "block";
         document.getElementById('formIuran').reset(); bikinOpsiTahunFormWarga();
+        $('#blokWargaIuran').val(null).trigger('change'); // Reset Select2
       } catch(err) { alert("Gagal mengirim."); }
       submitBtn.disabled = false; submitBtn.innerText = "Kirim Konfirmasi";
     };
@@ -817,7 +830,7 @@ async function tambahDataWarga() {
   if(res.sukses) {
     document.getElementById('inputBlokBaru').value = "";
     document.getElementById('inputNamaBaru').value = "";
-    fetchMasterWarga(); // Refresh global datalist
+    fetchMasterWarga(); // Refresh global select2 options
     if(document.getElementById('pilihSheetKelola').value === 'Master_Warga') { muatTabelKelola(); }
   }
 }
@@ -837,6 +850,11 @@ async function muatDataPolling() {
         if (!res.polling || res.polling.length === 0) {
             container.innerHTML = '<div class="alert alert-info text-center">Saat ini tidak ada polling yang aktif.</div>'; return;
         }
+
+        let optionsHtml = '<option value="">-- Pilih / Ketik Blok --</option>';
+        masterWargaGlobal.forEach(w => {
+            optionsHtml += `<option value="${w.blok}" data-nama="${w.nama}">${w.blok}</option>`;
+        });
 
         let html = '';
         res.polling.forEach(p => {
@@ -871,9 +889,12 @@ async function muatDataPolling() {
                 <div class="bg-light p-3 rounded mb-3">
                     <h6 class="fw-bold small mb-2">Berikan Suara Anda:</h6>
                     
+                    <!-- SELECT2 UNTUK POLLING -->
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <input type="text" class="form-control form-control-sm border-primary" list="datalistMasterBlok" id="blokVote_${p.id}" onchange="isiOtomatisNama(this.value, 'namaVote_${p.id}')" placeholder="Ketik Blok untuk mencari..." required autocomplete="off">
+                            <select class="form-control select2-polling" id="blokVote_${p.id}" required>
+                                ${optionsHtml}
+                            </select>
                         </div>
                         <div class="col-6">
                             <select class="form-select form-select-sm" id="pilihanVote_${p.id}">
@@ -885,6 +906,8 @@ async function muatDataPolling() {
                     <div class="mb-2">
                         <input type="text" class="form-control form-control-sm bg-light" id="namaVote_${p.id}" placeholder="Nama warga (Otomatis Terisi)" readonly>
                     </div>
+                    <!-- BATAS MODIFIKASI -->
+
                     <textarea class="form-control form-control-sm mb-2" id="komentarVote_${p.id}" rows="2" placeholder="Tulis komentar/alasan Anda (Opsional)"></textarea>
                     <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="kirimSuara('${p.id}', this)">Kirim Suara</button>
                     <div id="pesanVote_${p.id}" class="alert mt-2 p-2 small" style="display:none;"></div>
@@ -919,30 +942,38 @@ async function muatDataPolling() {
             }
             html += `</div></div>`;
         });
+        
         container.innerHTML = html;
+
+        // INISIASI SELECT2 UNTUK SETIAP POLLING YANG MUNCUL
+        res.polling.forEach(p => {
+            $(`#blokVote_${p.id}`).select2({ width: '100%' }).on('change', function() {
+                let namaTerpilih = $(this).find(':selected').data('nama');
+                $(`#namaVote_${p.id}`).val(namaTerpilih || '');
+            });
+        });
+
     } catch(e) { container.innerHTML = '<div class="alert alert-danger text-center">Gagal memuat data polling.</div>'; }
 }
 
 async function kirimSuara(idPolling, btn) {
-    const blok = document.getElementById(`blokVote_${idPolling}`).value.trim().toUpperCase();
+    const blok = $(`#blokVote_${idPolling}`).val(); // pakai fungsi jquery untuk select2
     const pilihan = document.getElementById(`pilihanVote_${idPolling}`).value;
     const komentar = document.getElementById(`komentarVote_${idPolling}`).value;
     const pesanBox = document.getElementById(`pesanVote_${idPolling}`);
-    if(!blok) { alert("Silakan Ketik atau Pilih Blok Rumah!"); return; }
+    if(!blok) { alert("Silakan Pilih Blok Rumah terlebih dahulu!"); return; }
     
-    // Validasi Blok
-    const cekAda = masterWargaGlobal.find(w => w.blok.toUpperCase() === blok);
-    if (!cekAda) {
-        alert("Blok yang Anda ketikkan tidak ada di sistem. Silakan pilih dari daftar."); return;
-    }
-
     btn.disabled = true; btn.innerText = "Mengirim...";
     try {
         const res = await apiPost('simpanSuaraPolling', { idPolling: idPolling, blok: blok, pilihan: pilihan, komentar: komentar });
         pesanBox.style.display = "block";
         pesanBox.className = res.sukses ? "alert alert-success mt-2 p-2 small" : "alert alert-danger mt-2 p-2 small";
         pesanBox.innerText = res.pesan;
-        if(res.sukses) { document.getElementById(`blokVote_${idPolling}`).value = ""; document.getElementById(`komentarVote_${idPolling}`).value = ""; setTimeout(() => { muatDataPolling(); }, 2000); }
+        if(res.sukses) { 
+            $(`#blokVote_${idPolling}`).val(null).trigger('change'); // reset select2
+            document.getElementById(`komentarVote_${idPolling}`).value = ""; 
+            setTimeout(() => { muatDataPolling(); }, 2000); 
+        }
     } catch(e) { alert("Gagal mengirim suara."); }
     btn.disabled = false; btn.innerText = "Kirim Suara";
 }
