@@ -227,30 +227,43 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 </div>
 
 <div id="subKelola" class="hidden">
-<div class="card p-3 mb-4 bg-light border-primary">
-<h6 class="fw-bold text-primary mb-2">➕ Tambah Warga Baru (Master)</h6>
-<div class="row g-2">
-<div class="col-8">
-<input type="text" class="form-control" id="inputBlokBaru" placeholder="Contoh: A16">
-</div>
-<div class="col-4">
-<button class="btn btn-primary w-100 fw-bold" onclick="tambahDataWarga()">Simpan</button>
-</div>
-</div>
-</div>
-<h5 class="mb-3 text-danger text-center fw-bold">Manajemen Edit & Hapus Data</h5>
-<div class="row g-2 mb-3">
-<div class="col-sm-6">
-<label class="form-label text-muted">Pilih Kategori Data:</label>
-<select class="form-select" id="pilihSheetKelola" onchange="handleKategoriKelolaChange()">
-<option value="Data_Pembayaran">Data Iuran Warga</option>
-<option value="Data_Pemasukan_Lain">Kas Masuk (Non-Iuran)</option>
-<option value="Data_Pengeluaran">Kas Keluar (Pengeluaran)</option>
-<option value="Master_Warga">Master Data Warga</option>
-<option value="Suara_Warga">Komentar & Suara Polling</option>
-</select>
-</div>
-<div class="col-sm-6">
+  
+  <div class="card p-3 mb-4 bg-light border-primary">
+    <h6 class="fw-bold text-primary mb-2">➕ Tambah Warga Baru (Master)</h6>
+    <div class="row g-2">
+      <div class="col-8">
+        <input type="text" class="form-control" id="inputBlokBaru" placeholder="Contoh: A16">
+      </div>
+      <div class="col-4">
+        <button class="btn btn-primary w-100 fw-bold" onclick="tambahDataWarga()">Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card p-3 mb-4 bg-light border-success">
+    <h6 class="fw-bold text-success mb-2">📊 Buat Polling Baru</h6>
+    <div class="mb-2">
+      <input type="text" class="form-control" id="inputJudulPolling" placeholder="Judul Polling (Contoh: Rencana Pemasangan CCTV)">
+    </div>
+    <div class="mb-2">
+      <textarea class="form-control" id="inputDeskripsiPolling" rows="2" placeholder="Penjelasan detail tentang polling ini..."></textarea>
+    </div>
+    <button class="btn btn-success w-100 fw-bold" id="btnBuatPolling" onclick="tambahDataPolling()">Terbitkan Polling</button>
+  </div>
+  <h5 class="mb-3 text-danger text-center fw-bold">Manajemen Edit & Hapus Data</h5>
+  <div class="row g-2 mb-3">
+    <div class="col-sm-6">
+      <label class="form-label text-muted">Pilih Kategori Data:</label>
+      <select class="form-select" id="pilihSheetKelola" onchange="handleKategoriKelolaChange()">
+        <option value="Data_Pembayaran">Data Iuran Warga</option>
+        <option value="Data_Pemasukan_Lain">Kas Masuk (Non-Iuran)</option>
+        <option value="Data_Pengeluaran">Kas Keluar (Pengeluaran)</option>
+        <option value="Master_Warga">Master Data Warga</option>
+        <option value="Suara_Warga">Komentar & Suara Polling</option>
+        <option value="Data_Polling">Master Data Polling</option> 
+      </select>
+    </div>
+    <div class="col-sm-6">
 <label class="form-label text-muted">Cari Data (Nama/Blok/Bulan):</label>
 <div class="input-group">
 <input type="text" class="form-control" id="kataKunciKelola" placeholder="Ketik kata kunci...">
@@ -696,10 +709,11 @@ const data = await apiGet('ambilSemuaDataUntukAdmin', { pilihanSheet: sheet, key
 document.getElementById('loadingKelola').style.display = "none";
 
 let headers;
-if (sheet === "Data_Pembayaran") headers = ["Tgl Input", "Nama", "Blok", "Bulan", "Nominal", "Bukti URL", "Status", "Aksi"];
-else if (sheet === "Master_Warga") headers = ["Blok", "Aksi"];
-else if (sheet === "Suara_Warga") headers = ["Timestamp", "ID Polling", "Blok", "Pilihan", "Komentar", "Balasan Admin", "Aksi"];
-else headers = ["Tanggal", "Kategori", "Nominal", "Keterangan", "Aksi"];
+    if (sheet === "Data_Pembayaran") headers = ["Tgl Input", "Nama", "Blok", "Bulan", "Nominal", "Bukti URL", "Status", "Aksi"];
+    else if (sheet === "Master_Warga") headers = ["Blok", "Aksi"];
+    else if (sheet === "Suara_Warga") headers = ["Timestamp", "ID Polling", "Blok", "Pilihan", "Komentar", "Balasan Admin", "Aksi"];
+    else if (sheet === "Data_Polling") headers = ["ID Polling", "Judul", "Deskripsi", "Status", "Aksi"]; // TAMBAHKAN BARIS INI
+    else headers = ["Tanggal", "Kategori", "Nominal", "Keterangan", "Aksi"];
 
 let headHtml = "<tr>"; headers.forEach(h => headHtml += `<th>${h}</th>`); headHtml += "</tr>";
 document.getElementById('headKelola').innerHTML = headHtml;
@@ -753,10 +767,11 @@ const sheet = document.getElementById('pilihSheetKelola').value;
 document.getElementById('formEditKelola').classList.remove('hidden'); document.getElementById('editRowId').innerText = rowId; document.getElementById('editSheetName').value = sheet;
 
 let headers;
-if (sheet === "Data_Pembayaran") headers = ["Tgl Input", "Nama", "Blok", "Bulan", "Nominal", "Bukti URL", "Status"];
-else if (sheet === "Master_Warga") headers = ["Blok"];
-else if (sheet === "Suara_Warga") headers = ["Timestamp", "ID Polling", "Blok", "Pilihan", "Komentar", "Balasan Admin"];
-else headers = ["Tanggal", "Kategori", "Nominal", "Keterangan"];
+    if (sheet === "Data_Pembayaran") headers = ["Tgl Input", "Nama", "Blok", "Bulan", "Nominal", "Bukti URL", "Status"];
+    else if (sheet === "Master_Warga") headers = ["Blok"];
+    else if (sheet === "Suara_Warga") headers = ["Timestamp", "ID Polling", "Blok", "Pilihan", "Komentar", "Balasan Admin"];
+    else if (sheet === "Data_Polling") headers = ["ID Polling", "Judul", "Deskripsi", "Status"]; // TAMBAHKAN BARIS INI
+    else headers = ["Tanggal", "Kategori", "Nominal", "Keterangan"];
 
 let formHtml = "";
 rowData.forEach((val, index) => {
@@ -904,6 +919,39 @@ async function kirimSuara(idPolling, btn) {
         }
     } catch(e) { alert("Gagal mengirim suara."); }
     btn.disabled = false; btn.innerText = "Kirim Suara";
+}
+
+async function tambahDataPolling() {
+  const judul = document.getElementById('inputJudulPolling').value;
+  const deskripsi = document.getElementById('inputDeskripsiPolling').value;
+  const btn = document.getElementById('btnBuatPolling');
+
+  if (!judul.trim() || !deskripsi.trim()) {
+    alert("Judul dan deskripsi polling wajib diisi!");
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerText = "Menerbitkan Polling...";
+
+  try {
+    const res = await apiPost('tambahPolling', { 
+      data: { judul: judul, deskripsi: deskripsi } 
+    });
+    alert(res.pesan);
+    
+    if (res.sukses) {
+      document.getElementById('inputJudulPolling').value = "";
+      document.getElementById('inputDeskripsiPolling').value = "";
+      muatDataPolling(); // Refresh otomatis tabel polling jika tab polling dibuka
+      muatTabelKelola(); // Refresh tabel admin
+    }
+  } catch(e) {
+    alert("Gagal menerbitkan polling. Periksa koneksi Anda.");
+  }
+
+  btn.disabled = false;
+  btn.innerText = "Terbitkan Polling";
 }
 </script>
 </body>
