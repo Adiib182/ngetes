@@ -831,14 +831,46 @@ async function muatDataPolling() {
             container.innerHTML = '<div class="alert alert-info text-center">Saat ini tidak ada polling yang aktif.</div>';
             return;
         }
-
         let html = '';
         res.polling.forEach(p => {
+            // Filter suara khusus untuk polling ini
+            const komentarPolling = res.suara ? res.suara.filter(s => s.idPolling == p.id) : [];
+            
+            // --- TAMBAHAN LOGIKA MENGHITUNG TOTAL SUARA ---
+            let totalSetuju = 0;
+            let totalTidak = 0;
+            komentarPolling.forEach(k => {
+                if (k.pilihan === "Setuju") totalSetuju++;
+                else if (k.pilihan === "Tidak Setuju") totalTidak++;
+            });
+            let totalSuara = totalSetuju + totalTidak;
+            // ----------------------------------------------
+
             html += `
             <div class="card-custom mb-4" style="border: 2px solid var(--secondary-color);">
                 <h5 class="fw-bold text-primary border-bottom pb-2">${p.judul}</h5>
                 <p class="small text-muted mb-3">${p.deskripsi}</p>
                 
+                <!-- TAMBAHAN TAMPILAN SKOR POLLING -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <div class="p-2 text-center rounded shadow-sm" style="background-color: #d1fae5; border: 1px solid #10b981;">
+                            <span class="d-block small fw-bold text-success mb-1">✅ Setuju</span>
+                            <h4 class="m-0 fw-bold text-success">${totalSetuju} <span class="fs-6 fw-normal">Suara</span></h4>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-2 text-center rounded shadow-sm" style="background-color: #fee2e2; border: 1px solid #ef4444;">
+                            <span class="d-block small fw-bold text-danger mb-1">❌ Tidak Setuju</span>
+                            <h4 class="m-0 fw-bold text-danger">${totalTidak} <span class="fs-6 fw-normal">Suara</span></h4>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-center mb-3">
+                    <span class="badge bg-secondary">Total Suara Masuk: ${totalSuara} Warga</span>
+                </div>
+                <!-- BATAS TAMPILAN SKOR -->
+
                 <div class="bg-light p-3 rounded mb-3">
                     <h6 class="fw-bold small mb-2">Berikan Suara Anda:</h6>
                     <div class="row g-2 mb-2">
@@ -856,12 +888,9 @@ async function muatDataPolling() {
                     <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="kirimSuara('${p.id}', this)">Kirim Suara</button>
                     <div id="pesanVote_${p.id}" class="alert mt-2 p-2 small" style="display:none;"></div>
                 </div>
-
                 <h6 class="fw-bold small border-bottom pb-1">Komentar Warga:</h6>
                 <div class="tabel-scroll p-2" style="max-height: 250px; background: #f8fafc;">
             `;
-
-            const komentarPolling = res.suara ? res.suara.filter(s => s.idPolling == p.id) : [];
             
             if (komentarPolling.length === 0) {
                 html += `<div class="text-center text-muted small py-2">Belum ada suara/komentar.</div>`;
