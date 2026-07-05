@@ -42,9 +42,18 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 .form-label { font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px; }
 .btn-upgrade { padding: 10px 20px; font-weight: 600; border-radius: 8px; transition: all 0.2s ease; }
 .btn-upgrade:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+
+/* Efek placeholder untuk datalist agar nampak lebih jelas */
+input[list]::-webkit-calendar-picker-indicator {
+  cursor: pointer; opacity: 0.6; transition: 0.2s;
+}
+input[list]:hover::-webkit-calendar-picker-indicator { opacity: 1; }
 </style>
 </head>
 <body>
+
+<datalist id="datalistMasterBlok"></datalist>
+
 <div class="app-header">
 <div class="logo-container">🏡📈</div>
 <h3>Sistem Kas & IPL Warga</h3>
@@ -133,18 +142,15 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 <div id="subWargaBayar">
 <h5 class="text-center fw-bold mb-3 text-dark">Kirim Konfirmasi Pembayaran</h5>
 <form id="formIuran">
-<!-- MODIFIKASI: Input Blok menjadi Dropdown & Nama otomatis -->
+
 <div class="mb-3">
 <label class="form-label">No. Rumah / Blok</label>
-<select class="form-select" id="blokWargaIuran" name="blok" onchange="isiOtomatisNama(this, 'namaWargaIuran')" required>
-<option value="">-- Memuat Data Blok... --</option>
-</select>
+<input type="text" class="form-control border-primary" list="datalistMasterBlok" name="blok" id="blokWargaIuran" onchange="isiOtomatisNama(this.value, 'namaWargaIuran')" placeholder="Ketik Blok untuk mencari..." required autocomplete="off">
 </div>
 <div class="mb-3">
 <label class="form-label">Nama</label>
-<input type="text" class="form-control bg-light" id="namaWargaIuran" name="nama" readonly required placeholder="Otomatis terisi setelah pilih blok">
+<input type="text" class="form-control bg-light" id="namaWargaIuran" name="nama" readonly required placeholder="Otomatis terisi setelah blok valid">
 </div>
-<!-- BATAS MODIFIKASI -->
 <div class="row g-2 mb-3">
 <div class="col-7">
 <label class="form-label">Iuran Bulan</label>
@@ -164,12 +170,11 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 </form>
 <div id="pesanWarga" class="alert mt-3" style="display:none;"></div>
 </div>
+
 <div id="subWargaCek" class="hidden">
 <h5 class="text-center fw-bold mb-3 text-dark">Cek Status Iuran Rumah</h5>
 <div class="input-group mb-3">
-<select class="form-select" id="blokCekMandiri">
-<option value="">-- Pilih Nomor Rumah --</option>
-</select>
+<input type="text" class="form-control" list="datalistMasterBlok" id="blokCekMandiri" placeholder="Ketik & Cari Nomor Rumah..." autocomplete="off">
 <button class="btn btn-primary fw-bold" type="button" id="btnProsesCek" onclick="prosesCekMandiriWarga()">Cari Data</button>
 </div>
 <div id="loadingCekWarga" class="text-center text-muted my-3" style="display:none;">Mencari data...</div>
@@ -306,13 +311,13 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 </div>
 <script>
 // ==============================================================
-// KONFIGURASI PENTING (GANTI URL DI BAWAH INI DENGAN URL GAS ANDA)
+// KONFIGURASI PENTING
 // ==============================================================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLcIGPs5KNwqZq4QmUUlXwbLbyLXSUzBKVMdjFqM3WLFUckATqXTSkzPsewQeQ1nyB/exec";
 const PASSWORD_ADMIN = "admin123";
 
 // ==============================================================
-// SISTEM PEMANGGILAN API (PENGGANTI google.script.run)
+// SISTEM PEMANGGILAN API
 // ==============================================================
 async function apiGet(action, params = {}) {
   let url = new URL(SCRIPT_URL);
@@ -340,43 +345,42 @@ const LIMIT_PER_PAGE = 20;
 let dataMasukGlobal = [], dataKeluarGlobal = [], dataKelolaGlobal = [];
 let pageMasuk = 1, pageKeluar = 1, pageKelola = 1;
 
-// Modifikasi State Global Warga
 let masterWargaGlobal = [];
 
 window.onload = function() {
   bikinOpsiTahunOtomatis();
   bikinOpsiTahunFormWarga();
   sesuaikanKategoriFormKas();
-  fetchMasterWarga(); // Ambil data warga dari DB di awal
+  fetchMasterWarga(); 
 };
 
-// Fitur Baru: Tarik Data Warga untuk Autofill
+// ==============================================================
+// FITUR BARU: AUTOCOMPLETE & AUTOFILL DARI DATALIST
+// ==============================================================
 async function fetchMasterWarga() {
   try {
     masterWargaGlobal = await apiGet('ambilMasterWarga');
-    populateBlokDropdowns();
+    populateBlokDatalist();
   } catch(e) { console.error("Gagal mengambil master warga", e); }
 }
 
-function populateBlokDropdowns() {
-  let optionsHtml = '<option value="">-- Pilih Blok --</option>';
+function populateBlokDatalist() {
+  let optionsHtml = '';
   masterWargaGlobal.forEach(w => {
-    optionsHtml += `<option value="${w.blok}" data-nama="${w.nama}">${w.blok}</option>`;
+    optionsHtml += `<option value="${w.blok}">`;
   });
-  
-  let selIuran = document.getElementById('blokWargaIuran');
-  if(selIuran) selIuran.innerHTML = optionsHtml;
-  
-  let selCek = document.getElementById('blokCekMandiri');
-  if(selCek) selCek.innerHTML = optionsHtml;
+  let dl = document.getElementById('datalistMasterBlok');
+  if(dl) dl.innerHTML = optionsHtml;
 }
 
-// Fitur Baru: Fungsi Otomatis Isi Nama
-function isiOtomatisNama(selectElem, targetId) {
-  let selectedOpt = selectElem.options[selectElem.selectedIndex];
-  let nama = selectedOpt ? selectedOpt.getAttribute('data-nama') : '';
+function isiOtomatisNama(blokValue, targetId) {
   let target = document.getElementById(targetId);
-  if(target) target.value = nama || '';
+  if(!target) return;
+  if(!blokValue) { target.value = ''; return; }
+  
+  // Cari di database lokal secara case-insensitive
+  let dataWarga = masterWargaGlobal.find(w => w.blok.toUpperCase() === blokValue.trim().toUpperCase());
+  target.value = dataWarga ? (dataWarga.nama || '') : '';
 }
 
 function renderPaginasi(containerId, totalData, currentPage, callbackName) {
@@ -535,7 +539,14 @@ document.getElementById('formPengeluaran').addEventListener('submit', async func
 async function prosesCekMandiriWarga() {
   const blokInput = document.getElementById('blokCekMandiri').value;
   const loading = document.getElementById('loadingCekWarga'), hasilBox = document.getElementById('hasilCekMandiri');
-  if(!blokInput.trim()) { alert("Silakan pilih Nomor Rumah!"); return; }
+  if(!blokInput.trim()) { alert("Silakan ketik atau pilih Nomor Rumah!"); return; }
+  
+  // Validasi ketat jika data tidak ada di master list
+  const cekAda = masterWargaGlobal.find(w => w.blok.toUpperCase() === blokInput.trim().toUpperCase());
+  if(!cekAda) {
+      alert("Blok yang Anda cari tidak ada di sistem. Silakan pilih dari daftar."); return;
+  }
+
   loading.style.display = "block"; hasilBox.classList.add('hidden');
   try {
     const res = await apiGet('cekTunggakanWargaMandiiri', { blokInput: blokInput });
@@ -570,6 +581,15 @@ async function bikinOpsiTahunOtomatis() {
 document.getElementById('formIuran').addEventListener('submit', function(e) {
   e.preventDefault();
   const submitBtn = document.getElementById('submitBtn'), pesanDiv = document.getElementById('pesanWarga');
+  
+  // Validasi ketat Datalist agar tidak salah blok
+  const blokInput = document.getElementsByName('blok')[0].value.trim().toUpperCase();
+  const cekAda = masterWargaGlobal.find(w => w.blok.toUpperCase() === blokInput);
+  if (!cekAda) {
+      alert("Blok yang Anda masukkan tidak valid. Silakan pilih kembali dari daftar.");
+      return;
+  }
+
   submitBtn.disabled = true; submitBtn.innerText = "Sedang Mengirim...";
   const file = document.getElementById('fileInput').files[0];
   if (file) {
@@ -698,7 +718,7 @@ async function muatTabelKelola() {
     document.getElementById('loadingKelola').style.display = "none";
     let headers;
     if (sheet === "Data_Pembayaran") headers = ["Tgl Input", "Nama", "Blok", "Bulan", "Nominal", "Bukti URL", "Status", "Aksi"];
-    else if (sheet === "Master_Warga") headers = ["Blok", "Nama Warga", "Aksi"]; // TAMBAHAN NAMA WARGA
+    else if (sheet === "Master_Warga") headers = ["Blok", "Nama Warga", "Aksi"];
     else if (sheet === "Suara_Warga") headers = ["Timestamp", "ID Polling", "Blok", "Pilihan", "Komentar", "Balasan Admin", "Aksi"];
     else if (sheet === "Data_Polling") headers = ["ID Polling", "Judul", "Deskripsi", "Status", "Aksi"];
     else headers = ["Tanggal", "Kategori", "Nominal", "Keterangan", "Aksi"];
@@ -720,7 +740,6 @@ function tampilkanTabelKelola() {
   const start = (pageKelola - 1) * LIMIT_PER_PAGE; const end = start + LIMIT_PER_PAGE;
   const dataTampil = dataKelolaGlobal.slice(start, end);
   
-  // Ambil struktur header yg sedang aktif
   let headers = Array.from(document.getElementById('headKelola').querySelectorAll('th')).map(th => th.innerText);
 
   dataTampil.forEach(row => {
@@ -756,7 +775,7 @@ function bukaFormEdit(rowData, rowId) {
   document.getElementById('formEditKelola').classList.remove('hidden'); document.getElementById('editRowId').innerText = rowId; document.getElementById('editSheetName').value = sheet;
   let headers;
   if (sheet === "Data_Pembayaran") headers = ["Tgl Input", "Nama", "Blok", "Bulan", "Nominal", "Bukti URL", "Status"];
-  else if (sheet === "Master_Warga") headers = ["Blok", "Nama Warga"]; // TAMBAHAN NAMA WARGA
+  else if (sheet === "Master_Warga") headers = ["Blok", "Nama Warga"]; 
   else if (sheet === "Suara_Warga") headers = ["Timestamp", "ID Polling", "Blok", "Pilihan", "Komentar", "Balasan Admin"];
   else if (sheet === "Data_Polling") headers = ["ID Polling", "Judul", "Deskripsi", "Status"];
   else headers = ["Tanggal", "Kategori", "Nominal", "Keterangan"];
@@ -798,7 +817,7 @@ async function tambahDataWarga() {
   if(res.sukses) {
     document.getElementById('inputBlokBaru').value = "";
     document.getElementById('inputNamaBaru').value = "";
-    fetchMasterWarga(); // Refresh global options
+    fetchMasterWarga(); // Refresh global datalist
     if(document.getElementById('pilihSheetKelola').value === 'Master_Warga') { muatTabelKelola(); }
   }
 }
@@ -818,11 +837,6 @@ async function muatDataPolling() {
         if (!res.polling || res.polling.length === 0) {
             container.innerHTML = '<div class="alert alert-info text-center">Saat ini tidak ada polling yang aktif.</div>'; return;
         }
-        
-        let optionsHtml = '<option value="">-- Pilih Blok --</option>';
-        masterWargaGlobal.forEach(w => {
-            optionsHtml += `<option value="${w.blok}" data-nama="${w.nama}">${w.blok}</option>`;
-        });
 
         let html = '';
         res.polling.forEach(p => {
@@ -857,12 +871,9 @@ async function muatDataPolling() {
                 <div class="bg-light p-3 rounded mb-3">
                     <h6 class="fw-bold small mb-2">Berikan Suara Anda:</h6>
                     
-                    <!-- MODIFIKASI POLLING DENGAN DROPDOWN NAMA OTOMATIS -->
                     <div class="row g-2 mb-2">
                         <div class="col-6">
-                            <select class="form-select form-select-sm" id="blokVote_${p.id}" onchange="isiOtomatisNama(this, 'namaVote_${p.id}')" required>
-                                ${optionsHtml}
-                            </select>
+                            <input type="text" class="form-control form-control-sm border-primary" list="datalistMasterBlok" id="blokVote_${p.id}" onchange="isiOtomatisNama(this.value, 'namaVote_${p.id}')" placeholder="Ketik Blok untuk mencari..." required autocomplete="off">
                         </div>
                         <div class="col-6">
                             <select class="form-select form-select-sm" id="pilihanVote_${p.id}">
@@ -874,8 +885,6 @@ async function muatDataPolling() {
                     <div class="mb-2">
                         <input type="text" class="form-control form-control-sm bg-light" id="namaVote_${p.id}" placeholder="Nama warga (Otomatis Terisi)" readonly>
                     </div>
-                    <!-- BATAS MODIFIKASI -->
-
                     <textarea class="form-control form-control-sm mb-2" id="komentarVote_${p.id}" rows="2" placeholder="Tulis komentar/alasan Anda (Opsional)"></textarea>
                     <button class="btn btn-primary btn-sm w-100 fw-bold" onclick="kirimSuara('${p.id}', this)">Kirim Suara</button>
                     <div id="pesanVote_${p.id}" class="alert mt-2 p-2 small" style="display:none;"></div>
@@ -915,11 +924,18 @@ async function muatDataPolling() {
 }
 
 async function kirimSuara(idPolling, btn) {
-    const blok = document.getElementById(`blokVote_${idPolling}`).value;
+    const blok = document.getElementById(`blokVote_${idPolling}`).value.trim().toUpperCase();
     const pilihan = document.getElementById(`pilihanVote_${idPolling}`).value;
     const komentar = document.getElementById(`komentarVote_${idPolling}`).value;
     const pesanBox = document.getElementById(`pesanVote_${idPolling}`);
-    if(!blok.trim()) { alert("Silakan Pilih Blok Rumah!"); return; }
+    if(!blok) { alert("Silakan Ketik atau Pilih Blok Rumah!"); return; }
+    
+    // Validasi Blok
+    const cekAda = masterWargaGlobal.find(w => w.blok.toUpperCase() === blok);
+    if (!cekAda) {
+        alert("Blok yang Anda ketikkan tidak ada di sistem. Silakan pilih dari daftar."); return;
+    }
+
     btn.disabled = true; btn.innerText = "Mengirim...";
     try {
         const res = await apiPost('simpanSuaraPolling', { idPolling: idPolling, blok: blok, pilihan: pilihan, komentar: komentar });
@@ -929,20 +945,6 @@ async function kirimSuara(idPolling, btn) {
         if(res.sukses) { document.getElementById(`blokVote_${idPolling}`).value = ""; document.getElementById(`komentarVote_${idPolling}`).value = ""; setTimeout(() => { muatDataPolling(); }, 2000); }
     } catch(e) { alert("Gagal mengirim suara."); }
     btn.disabled = false; btn.innerText = "Kirim Suara";
-}
-
-async function tambahDataPolling() {
-  const judul = document.getElementById('inputJudulPolling').value;
-  const deskripsi = document.getElementById('inputDeskripsiPolling').value;
-  const btn = document.getElementById('btnBuatPolling');
-  if (!judul.trim() || !deskripsi.trim()) { alert("Judul dan deskripsi polling wajib diisi!"); return; }
-  btn.disabled = true; btn.innerText = "Menerbitkan Polling...";
-  try {
-    const res = await apiPost('tambahPolling', { data: { judul: judul, deskripsi: deskripsi } });
-    alert(res.pesan);
-    if (res.sukses) { document.getElementById('inputJudulPolling').value = ""; document.getElementById('inputDeskripsiPolling').value = ""; muatDataPolling(); muatTabelKelola(); }
-  } catch(e) { alert("Gagal menerbitkan polling. Periksa koneksi Anda."); }
-  btn.disabled = false; btn.innerText = "Terbitkan Polling";
 }
 </script>
 </body>
