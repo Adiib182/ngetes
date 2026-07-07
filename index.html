@@ -374,6 +374,7 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 // ==============================================================
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyRGFOBi5ljxGQXNTwXDM2tGE6AhTCuuEo4FPO1rAv7ez0d_wioIeUHJZMY2oRSdUW9/exec";
 const PASSWORD_ADMIN = "admin123";
+const PASSWORD_WARGA = "TPS";
 
 async function apiGet(action, params = {}) {
   let url = new URL(SCRIPT_URL);
@@ -400,6 +401,16 @@ let pageMasuk = 1, pageKeluar = 1, pageKelola = 1;
 let masterWargaGlobal = [];
 
 window.onload = function() {
+  // Meminta password KHUSUS WARGA saat halaman pertama kali dimuat
+  let passWarga = prompt("Masukkan Password Warga untuk mengakses sistem:");
+  
+  if (passWarga !== PASSWORD_WARGA) {
+    alert("Password salah! Akses ditolak.");
+    document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>Akses Ditolak. Silakan refresh halaman.</h2>";
+    return; // Berhenti mengeksekusi script
+  }
+
+  // Jika password warga benar, jalankan inisialisasi awal
   bikinOpsiTahunOtomatis();
   bikinOpsiTahunFormWarga();
   sesuaikanKategoriFormKas();
