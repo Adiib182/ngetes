@@ -302,6 +302,52 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
    60% { transform: rotate( 0.0deg) }
   100% { transform: rotate( 0.0deg) }
 }
+/* =========================================================
+   SUB-MENU GAYA SEGMENTED CONTROL (iOS / MOBILE APP STYLE)
+   ========================================================= */
+.genz-submenu {
+  display: flex;
+  background: #f1f5f9;
+  padding: 6px;
+  border-radius: 16px;
+  gap: 6px;
+  overflow-x: auto;
+  white-space: nowrap;
+  margin-bottom: 24px;
+  /* Menyembunyikan scrollbar agar estetis di HP */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;  
+}
+.genz-submenu::-webkit-scrollbar { 
+  display: none; 
+}
+
+.genz-submenu button {
+  flex: 1; /* Membagi ukuran rata */
+  background: transparent;
+  border: none;
+  padding: 12px 16px;
+  border-radius: 12px;
+  font-weight: 700;
+  font-size: 13px;
+  color: #64748b;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.genz-submenu button:hover {
+  color: #0f172a;
+}
+
+/* Tampilan saat tombol / menu sedang aktif */
+.genz-submenu button.active {
+  background: white;
+  color: #6366f1; /* Menggunakan warna ungu khas tema awal */
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
 </style>
 </head>
 <body>
@@ -445,10 +491,10 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
       </div>
 
       <div id="halamanWarga" class="card-custom hidden">
-        <div class="d-flex justify-content-center gap-2 mb-4">
-          <button class="btn btn-sm btn-outline-primary active w-50 fw-bold" id="btnSubBayar" onclick="bukaSubWarga('bayar')">Konfirmasi Bayar</button>
-          <button class="btn btn-sm btn-outline-primary w-50 fw-bold" id="btnSubCekMandiri" onclick="bukaSubWarga('cek')">🔎 Cek Tunggakan</button>
-        </div>
+        <div class="genz-submenu">
+  <button class="active" id="btnSubBayar" onclick="bukaSubWarga('bayar')">💳 Konfirmasi Bayar</button>
+  <button id="btnSubCekMandiri" onclick="bukaSubWarga('cek')">🔎 Cek Tunggakan</button>
+</div>
         <div id="subWargaBayar">
           <h5 class="text-center fw-bold mb-3 text-dark">Kirim Konfirmasi Pembayaran</h5>
           <form id="formIuran">
@@ -511,12 +557,12 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 
       <div id="halamanAdmin" class="card-custom hidden">
         <h5 class="text-center fw-bold mb-3 text-dark">Panel Kontrol Verifikasi Admin</h5>
-        <div class="d-flex justify-content-center gap-1 mb-4 flex-wrap">
-          <button class="btn btn-sm btn-outline-primary active fw-bold" id="btnSubVerifikasi" onclick="bukaSubAdmin('verifikasi')">Verifikasi Masuk</button>
-          <button class="btn btn-sm btn-outline-primary fw-bold" id="btnSubTunggakan" onclick="bukaSubAdmin('tunggakan')">Rekap Tunggakan</button>
-          <button class="btn btn-sm btn-outline-dark fw-bold" id="btnSubPengeluaran" onclick="bukaSubAdmin('pengeluaran')">🔄 Buku Kas Umum</button>
-          <button class="btn btn-sm btn-outline-danger fw-bold" id="btnSubKelola" onclick="bukaSubAdmin('kelola')">⚙️ Kelola Data</button>
-        </div>
+        <div class="genz-submenu">
+  <button class="active" id="btnSubVerifikasi" onclick="bukaSubAdmin('verifikasi')">✅ Verifikasi Masuk</button>
+  <button id="btnSubTunggakan" onclick="bukaSubAdmin('tunggakan')">⚠️ Rekap Tunggakan</button>
+  <button id="btnSubPengeluaran" onclick="bukaSubAdmin('pengeluaran')">🔄 Buku Kas</button>
+  <button id="btnSubKelola" onclick="bukaSubAdmin('kelola')">⚙️ Kelola Data</button>
+</div>
         <div id="subVerifikasi"><div id="loadingAdmin" class="text-center text-muted">Mengambil data pending...</div><div id="daftarPending"></div></div>
         
         <div id="subTunggakan" class="hidden">
@@ -803,10 +849,13 @@ function bukaSubWarga(sub) {
   if (sub === 'bayar') {
     document.getElementById('subWargaBayar').classList.remove('hidden');
     document.getElementById('subWargaCek').classList.add('hidden');
-    document.getElementById('btnSubBayar').classList.add('active'); document.getElementById('btnSubCekMandiri').classList.remove('active');
+    document.getElementById('btnSubBayar').classList.add('active'); 
+    document.getElementById('btnSubCekMandiri').classList.remove('active');
   } else {
-    document.getElementById('subWargaBayar').classList.add('hidden'); document.getElementById('subWargaCek').classList.remove('hidden');
-    document.getElementById('btnSubBayar').className = "btn btn-sm btn-outline-primary w-50 fw-bold"; document.getElementById('btnSubCekMandiri').classList.add('active');
+    document.getElementById('subWargaBayar').classList.add('hidden'); 
+    document.getElementById('subWargaCek').classList.remove('hidden');
+    document.getElementById('btnSubBayar').classList.remove('active'); 
+    document.getElementById('btnSubCekMandiri').classList.add('active');
   }
 }
 
