@@ -79,22 +79,155 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
   border-radius: 50%; display: flex; align-items: center; justify-content: center;
   font-size: 28px; margin: 0 auto 15px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
+/* =========================================================
+   TEMA LOGIN GEN Z : "TITIK PULANG (TWILIGHT GLASSMORPHISM)"
+   ========================================================= */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap');
+
+.genz-login-wrapper {
+  display: flex; justify-content: center; align-items: center;
+  height: 100vh;
+  /* Animasi background gradien senja (twilight) yang bergerak */
+  background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #4c1d95);
+  background-size: 400% 400%;
+  animation: gradientBG 12s ease infinite;
+  font-family: 'Plus Jakarta Sans', 'Segoe UI', Tahoma, sans-serif;
+}
+
+@keyframes gradientBG {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 40px 30px;
+  border-radius: 28px;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  text-align: center;
+  max-width: 380px;
+  width: 90%;
+  color: white;
+  transition: transform 0.3s ease;
+}
+
+.glass-card:hover { transform: translateY(-5px); }
+
+.emoji-header {
+  font-size: 54px;
+  margin-bottom: 10px;
+  filter: drop-shadow(0 0 15px rgba(255,255,255,0.2));
+  animation: float 3s ease-in-out infinite;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+}
+
+.title-text {
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: -1px;
+  line-height: 1.1;
+  margin-bottom: 8px;
+}
+
+.title-text .highlight {
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle-text {
+  font-size: 14px;
+  color: #cbd5e1;
+  margin-bottom: 30px;
+  font-weight: 400;
+}
+
+.input-group-custom input {
+  width: 100%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 18px;
+  padding: 16px 20px;
+  color: white;
+  font-size: 15px;
+  outline: none;
+  transition: all 0.3s ease;
+  margin-bottom: 20px;
+  text-align: center;
+  letter-spacing: 1px;
+}
+
+.input-group-custom input::placeholder { color: rgba(255, 255, 255, 0.4); font-weight: 400; letter-spacing: normal; }
+.input-group-custom input:focus {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: #a78bfa;
+  box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2);
+}
+
+.btn-genz {
+  width: 100%;
+  background: linear-gradient(135deg, #6366f1, #a855f7);
+  color: white;
+  border: none;
+  padding: 16px 20px;
+  border-radius: 18px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 25px rgba(168, 85, 247, 0.4);
+}
+
+.btn-genz:hover { transform: scale(1.03); box-shadow: 0 15px 30px rgba(168, 85, 247, 0.5); }
+.btn-genz:active { transform: scale(0.97); }
+
+.error-msg {
+  color: #fda4af;
+  background: rgba(225, 29, 72, 0.2);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  padding: 12px;
+  border-radius: 14px;
+  margin-top: 15px;
+  font-size: 13px;
+  font-weight: 600;
+  display: none;
+  animation: shake 0.4s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-6px); }
+  50% { transform: translateX(6px); }
+  75% { transform: translateX(-6px); }
+}
 </style>
 </head>
 <body>
-<div id="loginScreen">
-  <div class="login-card">
-    <div class="logo-login">🏡</div>
-    <h4>.getHome</h4>
-    <p class="text-muted small mb-4">Silakan masukkan password lingkungan untuk mengakses sistem.</p>
+<div id="loginScreen" class="genz-login-wrapper">
+  <div class="glass-card">
+    <div class="emoji-header">🌆✨</div>
+    <h3 class="title-text">Titik Pulang<br><span class="highlight">Sawangan</span></h3>
+    <p class="subtitle-text">Waktunya rebahan! 🛋️<br>Masukin password dulu ya warga~</p>
+
+    <div class="input-group-custom">
+      <input type="password" id="inputPasswordWarga" placeholder="Ketik password di sini..." autocomplete="off">
+    </div>
     
-    <input type="password" id="inputPasswordWarga" class="form-control mb-3" placeholder="Masukkan Password Warga">
-    <button class="btn btn-primary w-100 fw-bold btn-upgrade" onclick="cekLoginWarga()">Masuk Sistem</button>
+    <button class="btn-genz" onclick="cekLoginWarga()">Let me in! 🚀</button>
     
-    <div id="pesanErrorLogin" class="text-danger small mt-2 fw-bold" style="display:none;">Password Salah! Coba lagi.</div>
+    <div id="pesanErrorLogin" class="error-msg">Oops! Password-nya salah bestie 🥺</div>
   </div>
 </div>
 
+<!-- BUNGKUS APLIKASI UTAMA (Disembunyikan di awal) -->
 <div id="mainApp" style="display: none;">
   
   <div class="app-header">
@@ -432,33 +565,39 @@ let pageMasuk = 1, pageKeluar = 1, pageKelola = 1;
 let masterWargaGlobal = [];
 
 window.onload = function() {
-  // Hanya fokuskan kursor ke kolom input password
+  // Hanya memunculkan layar login dan otomatis fokus ke kolom input
   document.getElementById('inputPasswordWarga').focus();
 };
 
-// Fungsi baru untuk mengecek login melalui halaman opening
 function cekLoginWarga() {
   const passInput = document.getElementById('inputPasswordWarga').value;
   const pesanError = document.getElementById('pesanErrorLogin');
 
   if (passInput === PASSWORD_WARGA) {
-    // Jika benar, sembunyikan halaman login dan tampilkan aplikasi utama
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'block';
+    // Animasi fade out sebelum masuk sistem
+    document.getElementById('loginScreen').style.opacity = '0';
+    document.getElementById('loginScreen').style.transition = 'opacity 0.5s ease';
+    
+    setTimeout(() => {
+      document.getElementById('loginScreen').style.display = 'none';
+      document.getElementById('mainApp').style.display = 'block';
+      
+      // Jalankan fungsi fetch data Google Sheet
+      bikinOpsiTahunOtomatis();
+      bikinOpsiTahunFormWarga();
+      sesuaikanKategoriFormKas();
+      fetchMasterWarga(); 
+    }, 500);
 
-    // Jalankan pengambilan data master setelah masuk
-    bikinOpsiTahunOtomatis();
-    bikinOpsiTahunFormWarga();
-    sesuaikanKategoriFormKas();
-    fetchMasterWarga(); 
   } else {
-    // Jika salah, tampilkan pesan error merah
+    // Menampilkan pesan error dengan animasi shake (getar)
     pesanError.style.display = 'block';
-    setTimeout(() => { pesanError.style.display = 'none'; }, 3000);
+    document.getElementById('inputPasswordWarga').value = ''; // Kosongkan input
+    setTimeout(() => { pesanError.style.display = 'none'; }, 3500);
   }
 }
 
-// Tambahan agar bisa login dengan menekan tombol "Enter" di keyboard
+// Fitur enter dari keyboard
 document.getElementById('inputPasswordWarga').addEventListener('keypress', function(e) {
   if (e.key === 'Enter') {
     cekLoginWarga();
