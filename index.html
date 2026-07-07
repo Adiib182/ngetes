@@ -209,45 +209,98 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
   75% { transform: translateX(-6px); }
 }
 /* =========================================================
-   TWEAK UNTUK DALEMAN DASHBOARD BIAR LEBIH MATCHING
+   HEADER GAUL "FLOATING ISLAND" 
    ========================================================= */
-
-/* Samakan animasi header atas dengan background login */
-.app-header { 
-  background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #4c1d95);
-  background-size: 400% 400%;
-  animation: gradientBG 12s ease infinite;
-  border-radius: 0 0 32px 32px; /* Lengkungan lebih mulus */
-  padding: 35px 20px;
+.header-genz-island {
+  /* Warna gelap kaca tembus pandang */
+  background: rgba(15, 23, 42, 0.85); 
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  
+  /* Membuatnya melayang di tengah */
+  max-width: 1160px;
+  margin: 20px auto 25px auto;
+  border-radius: 24px;
+  padding: 16px 24px;
+  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  
+  /* Efek bayangan & garis tepi tipis khas Apple/Modern UI */
+  box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  transition: transform 0.3s ease;
 }
 
-/* Kotak utama jadi lebih estetik dan border-nya dihaluskan */
-.card-custom { 
-  border-radius: 24px; 
-  border: none; 
-  box-shadow: 0 15px 35px rgba(0,0,0,0.04); 
+.header-genz-island:hover {
+  transform: translateY(-2px);
 }
 
-/* Menu navigasi samping dibikin lebih membulat (Pill shape) */
-.nav-pills { 
-  background: #f8fafc; 
-  border-radius: 20px; 
-  padding: 10px;
-}
-.nav-pills .nav-link { 
-  border-radius: 14px; 
-  font-weight: 700; 
-  padding: 12px 15px;
-}
-.nav-pills .nav-link.active {
-  background: linear-gradient(135deg, #6366f1, #a855f7); /* Tombol menu aktif warna ungu Gen Z */
-  box-shadow: 0 6px 15px rgba(168, 85, 247, 0.3);
+.island-info {
+  display: flex;
+  align-items: center;
+  gap: 16px;
 }
 
-/* Tombol-tombol di dalam form */
-.btn-upgrade {
-  border-radius: 14px;
+.island-logo {
+  font-size: 26px;
+  /* Warna cerah mencolok untuk logo */
+  background: linear-gradient(135deg, #a78bfa, #f472b6);
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  box-shadow: 0 8px 20px rgba(167, 139, 250, 0.4);
+}
+
+.island-text h3 {
+  color: white;
+  font-weight: 800;
+  font-size: 18px;
+  margin: 0;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.island-text p {
+  color: #94a3b8;
+  font-size: 12px;
+  margin: 0;
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+.island-badge {
+  background: rgba(167, 139, 250, 0.15);
+  color: #c4b5fd;
+  padding: 8px 16px;
+  border-radius: 100px; /* Bentuk pil penuh */
+  font-size: 12px;
   font-weight: 700;
+  border: 1px solid rgba(167, 139, 250, 0.3);
+  letter-spacing: 0.5px;
+}
+
+/* Animasi lambaian tangan */
+.wave {
+  display: inline-block;
+  animation: wave-animation 2.5s infinite;
+  transform-origin: 70% 70%;
+}
+@keyframes wave-animation {
+    0% { transform: rotate( 0.0deg) }
+   10% { transform: rotate(14.0deg) }
+   20% { transform: rotate(-8.0deg) }
+   30% { transform: rotate(14.0deg) }
+   40% { transform: rotate(-4.0deg) }
+   50% { transform: rotate(10.0deg) }
+   60% { transform: rotate( 0.0deg) }
+  100% { transform: rotate( 0.0deg) }
 }
 </style>
 </head>
@@ -271,10 +324,17 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 <!-- BUNGKUS APLIKASI UTAMA (Disembunyikan di awal) -->
 <div id="mainApp" style="display: none;">
   
-  <div class="app-header">
-    <div class="logo-container">🏡</div>
-    <h3>.getHome</h3>
-    <p>Cluster Titik Pulang Sawangan</p>
+  <div class="header-genz-island">
+    <div class="island-info">
+      <div class="island-logo">🏡</div>
+      <div class="island-text">
+        <h3>getHome <span class="wave">👋</span></h3>
+        <p>Titik Pulang Sawangan ✨</p>
+      </div>
+    </div>
+    <div class="island-badge">
+      Warga Zone 🚀
+    </div>
   </div>
 
   <div class="app-wrapper">
