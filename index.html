@@ -208,6 +208,47 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
   50% { transform: translateX(6px); }
   75% { transform: translateX(-6px); }
 }
+/* =========================================================
+   TWEAK UNTUK DALEMAN DASHBOARD BIAR LEBIH MATCHING
+   ========================================================= */
+
+/* Samakan animasi header atas dengan background login */
+.app-header { 
+  background: linear-gradient(-45deg, #0f172a, #1e1b4b, #312e81, #4c1d95);
+  background-size: 400% 400%;
+  animation: gradientBG 12s ease infinite;
+  border-radius: 0 0 32px 32px; /* Lengkungan lebih mulus */
+  padding: 35px 20px;
+}
+
+/* Kotak utama jadi lebih estetik dan border-nya dihaluskan */
+.card-custom { 
+  border-radius: 24px; 
+  border: none; 
+  box-shadow: 0 15px 35px rgba(0,0,0,0.04); 
+}
+
+/* Menu navigasi samping dibikin lebih membulat (Pill shape) */
+.nav-pills { 
+  background: #f8fafc; 
+  border-radius: 20px; 
+  padding: 10px;
+}
+.nav-pills .nav-link { 
+  border-radius: 14px; 
+  font-weight: 700; 
+  padding: 12px 15px;
+}
+.nav-pills .nav-link.active {
+  background: linear-gradient(135deg, #6366f1, #a855f7); /* Tombol menu aktif warna ungu Gen Z */
+  box-shadow: 0 6px 15px rgba(168, 85, 247, 0.3);
+}
+
+/* Tombol-tombol di dalam form */
+.btn-upgrade {
+  border-radius: 14px;
+  font-weight: 700;
+}
 </style>
 </head>
 <body>
