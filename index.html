@@ -63,16 +63,47 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
 .select2-container--default .select2-selection--single .select2-selection__rendered { line-height: 28px; color: #334155; padding-left: 0; }
 .select2-search__field { outline: none !important; border-radius: 4px; }
 .select2-dropdown { border: 1px solid #cbd5e1; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+
+/* CSS Tambahan untuk Layar Login */
+#loginScreen {
+  display: flex; justify-content: center; align-items: center;
+  height: 100vh; background: linear-gradient(135deg, var(--primary-color) 0%, #0f172a 100%);
+}
+.login-card {
+  background: white; padding: 40px 30px; border-radius: var(--card-radius);
+  box-shadow: 0px 10px 30px rgba(0,0,0,0.2); text-align: center; max-width: 400px; width: 90%;
+}
+.login-card h4 { font-weight: 700; color: var(--primary-color); margin-bottom: 5px; }
+.login-card .logo-login {
+  width: 60px; height: 60px; background: var(--primary-color); color: white;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  font-size: 28px; margin: 0 auto 15px auto; box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+}
 </style>
 </head>
 <body>
-<div class="app-header">
-  <div class="logo-container">🏡📈</div>
-  <h3>getHome</h3>
-  <p>Cluster Titik Pulang Sawangan</p>
+<div id="loginScreen">
+  <div class="login-card">
+    <div class="logo-login">🏡</div>
+    <h4>Sistem getHome</h4>
+    <p class="text-muted small mb-4">Silakan masukkan password lingkungan untuk mengakses sistem.</p>
+    
+    <input type="password" id="inputPasswordWarga" class="form-control mb-3" placeholder="Masukkan Password Warga">
+    <button class="btn btn-primary w-100 fw-bold btn-upgrade" onclick="cekLoginWarga()">Masuk Sistem</button>
+    
+    <div id="pesanErrorLogin" class="text-danger small mt-2 fw-bold" style="display:none;">Password Salah! Coba lagi.</div>
+  </div>
 </div>
 
-<div class="app-wrapper">
+<div id="mainApp" style="display: none;">
+  
+  <div class="app-header">
+    <div class="logo-container">🏡📈</div>
+    <h3>getHome</h3>
+    <p>Cluster Titik Pulang Sawangan</p>
+  </div>
+
+  <div class="app-wrapper">
   <div class="row">
     
     <div class="col-lg-3 col-md-4 mb-4">
@@ -401,21 +432,38 @@ let pageMasuk = 1, pageKeluar = 1, pageKelola = 1;
 let masterWargaGlobal = [];
 
 window.onload = function() {
-  // Meminta password KHUSUS WARGA saat halaman pertama kali dimuat
-  let passWarga = prompt("Masukkan Password Warga untuk mengakses sistem:");
-  
-  if (passWarga !== PASSWORD_WARGA) {
-    alert("Password salah! Akses ditolak.");
-    document.body.innerHTML = "<h2 style='text-align:center; margin-top:50px;'>Akses Ditolak. Silakan refresh halaman.</h2>";
-    return; // Berhenti mengeksekusi script
-  }
-
-  // Jika password warga benar, jalankan inisialisasi awal
-  bikinOpsiTahunOtomatis();
-  bikinOpsiTahunFormWarga();
-  sesuaikanKategoriFormKas();
-  fetchMasterWarga(); 
+  // Hanya fokuskan kursor ke kolom input password
+  document.getElementById('inputPasswordWarga').focus();
 };
+
+// Fungsi baru untuk mengecek login melalui halaman opening
+function cekLoginWarga() {
+  const passInput = document.getElementById('inputPasswordWarga').value;
+  const pesanError = document.getElementById('pesanErrorLogin');
+
+  if (passInput === PASSWORD_WARGA) {
+    // Jika benar, sembunyikan halaman login dan tampilkan aplikasi utama
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'block';
+
+    // Jalankan pengambilan data master setelah masuk
+    bikinOpsiTahunOtomatis();
+    bikinOpsiTahunFormWarga();
+    sesuaikanKategoriFormKas();
+    fetchMasterWarga(); 
+  } else {
+    // Jika salah, tampilkan pesan error merah
+    pesanError.style.display = 'block';
+    setTimeout(() => { pesanError.style.display = 'none'; }, 3000);
+  }
+}
+
+// Tambahan agar bisa login dengan menekan tombol "Enter" di keyboard
+document.getElementById('inputPasswordWarga').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter') {
+    cekLoginWarga();
+  }
+});
 
 async function fetchMasterWarga() {
   try {
