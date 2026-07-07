@@ -398,6 +398,9 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
           <li class="nav-item mb-2">
             <button class="nav-link w-100 text-start" id="tabPolling" onclick="bukaHalaman('polling')">🗳️ Polling</button>
           </li>
+          <li class="nav-item mb-2">
+            <button class="nav-link w-100 text-start" id="tabSecurity" onclick="bukaHalaman('security')">🛡️ Jadwal Security</button>
+          </li>
           <li class="nav-item">
             <button class="nav-link w-100 text-start" id="tabAdmin" onclick="bukaHalaman('admin')">🔒 Admin</button>
           </li>
@@ -554,6 +557,30 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
           <div class="text-center text-muted">Memuat data polling...</div>
         </div>
       </div>
+      <!-- HALAMAN SECURITY BARU -->
+      <div id="halamanSecurity" class="card-custom hidden">
+        <h5 class="text-center fw-bold mb-1 text-dark">Data Absen & Jadwal Security</h5>
+        <p class="text-center text-muted small mb-3">Menampilkan catatan jadwal penjagaan untuk bulan ini.</p>
+        
+        <div id="loadingSecurity" class="text-center text-muted">Memuat data...</div>
+        
+        <div class="tabel-scroll mt-2" style="max-height: 400px;">
+          <table class="table table-sm table-bordered table-striped align-middle small mb-0 bg-white" id="tabelSecurity" style="display: none;">
+            <thead class="table-dark sticky-top">
+              <tr>
+                <th>Waktu (Timestamp)</th>
+                <th>Nama</th>
+                <th>Departemen</th>
+                <th>Status</th>
+                <th>Shift</th>
+                <th class="text-center">Link Foto</th>
+              </tr>
+            </thead>
+            <tbody id="bodySecurity"></tbody>
+          </table>
+        </div>
+      </div>
+      <!-- AKHIR HALAMAN SECURITY -->
 
       <div id="halamanAdmin" class="card-custom hidden">
         <h5 class="text-center fw-bold mb-3 text-dark">Panel Kontrol Verifikasi Admin</h5>
@@ -827,8 +854,10 @@ function formatRibuan(input) {
 }
 
 function bukaHalaman(menu) {
-  ['halamanDashboard', 'halamanWarga', 'halamanPolling', 'halamanAdmin'].forEach(id => document.getElementById(id).classList.add('hidden'));
-  ['tabDashboard', 'tabWarga', 'tabPolling', 'tabAdmin'].forEach(id => document.getElementById(id).classList.remove('active'));
+  // Tambahkan halamanSecurity dan tabSecurity ke dalam array
+  ['halamanDashboard', 'halamanWarga', 'halamanPolling', 'halamanAdmin', 'halamanSecurity'].forEach(id => document.getElementById(id).classList.add('hidden'));
+  ['tabDashboard', 'tabWarga', 'tabPolling', 'tabAdmin', 'tabSecurity'].forEach(id => document.getElementById(id).classList.remove('active'));
+  
   if (menu === 'dashboard') {
     document.getElementById('halamanDashboard').classList.remove('hidden'); document.getElementById('tabDashboard').classList.add('active'); bikinOpsiTahunOtomatis();
   } else if (menu === 'warga') {
@@ -842,6 +871,9 @@ function bukaHalaman(menu) {
     } else { alert("Password Salah!"); bukaHalaman('dashboard'); return;
     } }
     document.getElementById('halamanAdmin').classList.remove('hidden'); document.getElementById('tabAdmin').classList.add('active'); bukaSubAdmin('verifikasi');
+  } else if (menu === 'security') {
+    document.getElementById('halamanSecurity').classList.remove('hidden'); document.getElementById('tabSecurity').classList.add('active');
+    muatJadwalSecurity(); // Ini memanggil fungsi untuk mengambil data
   }
 }
 
@@ -1354,6 +1386,53 @@ async function kirimSuara(idPolling, btn) {
         }
     } catch(e) { alert("Gagal mengirim suara."); }
     btn.disabled = false; btn.innerText = "Kirim Suara";
+}
+
+async function muatJadwalSecurity() {
+  document.getElementById('loadingSecurity').style.display = "block";
+  document.getElementById('tabelSecurity').style.display = "none";
+  document.getElementById('bodySecurity').innerHTML = "";
+  
+  try {
+    const data = await apiGet('ambilJadwalSecurity');
+    document.getElementById('loadingSecurity').style.display = "none";
+    
+    if (data.error) {
+      alert(data.error);
+      return;
+    }
+    
+    document.getElementById('tabelSecurity').style.display = "table";
+    const tbody = document.getElementById('bodySecurity');
+    
+    if (data.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Belum ada data jadwal untuk bulan ini.</td></tr>';
+      return;
+    }
+
+    data.forEach(item => {
+      let linkFoto = item.foto && item.foto.includes('http') ? 
+        `<a href="${item.foto}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">Lihat Foto</a>` : '-';
+        
+      let badgeWarna = 'bg-secondary';
+      if (item.status.toLowerCase().includes('hadir') || item.status.toLowerCase().includes('masuk')) badgeWarna = 'bg-success';
+      else if (item.status.toLowerCase().includes('izin') || item.status.toLowerCase().includes('sakit')) badgeWarna = 'bg-warning text-dark';
+      else if (item.status.toLowerCase().includes('absen') || item.status.toLowerCase().includes('alfa')) badgeWarna = 'bg-danger';
+
+      tbody.insertAdjacentHTML('beforeend', `
+        <tr>
+          <td class="text-nowrap">${item.timestamp}</td>
+          <td class="fw-bold">${item.nama}</td>
+          <td>${item.departemen}</td>
+          <td><span class="badge ${badgeWarna}">${item.status}</span></td>
+          <td><span class="badge bg-primary">${item.shift}</span></td>
+          <td class="text-center">${linkFoto}</td>
+        </tr>
+      `);
+    });
+  } catch (e) {
+    document.getElementById('loadingSecurity').innerText = "Terjadi kesalahan saat memuat jadwal.";
+  }
 }
 </script>
 </body>
