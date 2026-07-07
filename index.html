@@ -559,24 +559,44 @@ body { background-color: var(--bg-light); padding: 0; margin: 0; font-family: 'S
       </div>
       <!-- HALAMAN SECURITY BARU -->
       <div id="halamanSecurity" class="card-custom hidden">
-        <h5 class="text-center fw-bold mb-1 text-dark">Data Absen & Jadwal Security</h5>
-        <p class="text-center text-muted small mb-3">Menampilkan catatan jadwal penjagaan untuk bulan ini.</p>
+        <h5 class="text-center fw-bold mb-1 text-dark">Jadwal & Kontak Security</h5>
+        <p class="text-center text-muted small mb-3">Menampilkan jadwal shift penjagaan untuk bulan ini.</p>
         
+        <!-- KOTAK INFO KONTAK SECURITY -->
+        <div class="row g-2 mb-3 text-center">
+          <div class="col-4">
+            <div class="p-2 border rounded bg-light shadow-sm">
+              <span class="d-block fw-bold text-primary">👮‍♂️ Nur</span>
+              <a href="https://wa.me/6281xxxxxxxxx" target="_blank" class="text-decoration-none small text-success fw-bold">📞 08xx-xxxx-xxxx</a>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 border rounded bg-light shadow-sm">
+              <span class="d-block fw-bold text-primary">👮‍♂️ Hendra</span>
+              <a href="https://wa.me/6281xxxxxxxxx" target="_blank" class="text-decoration-none small text-success fw-bold">📞 08xx-xxxx-xxxx</a>
+            </div>
+          </div>
+          <div class="col-4">
+            <div class="p-2 border rounded bg-light shadow-sm">
+              <span class="d-block fw-bold text-primary">👮‍♂️ Jangkung</span>
+              <a href="https://wa.me/6281xxxxxxxxx" target="_blank" class="text-decoration-none small text-success fw-bold">📞 08xx-xxxx-xxxx</a>
+            </div>
+          </div>
+        </div>
+
         <div id="loadingSecurity" class="text-center text-muted">Memuat data...</div>
         
         <div class="tabel-scroll mt-2" style="max-height: 400px;">
           <table class="table table-sm table-bordered table-striped align-middle small mb-0 bg-white" id="tabelSecurity" style="display: none;">
             <thead class="table-dark sticky-top">
               <tr>
-                <th>Waktu (Timestamp)</th>
-                <th>Nama</th>
-                <th>Departemen</th>
-                <th>Status</th>
-                <th>Shift</th>
-                <th class="text-center">Link Foto</th>
+                <th class="text-center">Tanggal</th>
+                <th class="text-center">Shift 1</th>
+                <th class="text-center">Shift 2</th>
+                <th class="text-center text-danger">Libur / Off</th>
               </tr>
             </thead>
-            <tbody id="bodySecurity"></tbody>
+            <tbody id="bodySecurity" class="text-center"></tbody>
           </table>
         </div>
       </div>
@@ -1406,27 +1426,17 @@ async function muatJadwalSecurity() {
     const tbody = document.getElementById('bodySecurity');
     
     if (data.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-3">Belum ada data jadwal untuk bulan ini.</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="4" class="text-center text-muted py-3">Belum ada data jadwal untuk bulan ini.</td></tr>';
       return;
     }
 
     data.forEach(item => {
-      let linkFoto = item.foto && item.foto.includes('http') ? 
-        `<a href="${item.foto}" target="_blank" class="btn btn-sm btn-outline-primary py-0 px-2" style="font-size: 11px;">Lihat Foto</a>` : '-';
-        
-      let badgeWarna = 'bg-secondary';
-      if (item.status.toLowerCase().includes('hadir') || item.status.toLowerCase().includes('masuk')) badgeWarna = 'bg-success';
-      else if (item.status.toLowerCase().includes('izin') || item.status.toLowerCase().includes('sakit')) badgeWarna = 'bg-warning text-dark';
-      else if (item.status.toLowerCase().includes('absen') || item.status.toLowerCase().includes('alfa')) badgeWarna = 'bg-danger';
-
       tbody.insertAdjacentHTML('beforeend', `
         <tr>
-          <td class="text-nowrap">${item.timestamp}</td>
-          <td class="fw-bold">${item.nama}</td>
-          <td>${item.departemen}</td>
-          <td><span class="badge ${badgeWarna}">${item.status}</span></td>
-          <td><span class="badge bg-primary">${item.shift}</span></td>
-          <td class="text-center">${linkFoto}</td>
+          <td class="text-nowrap fw-bold">${item.tanggal}</td>
+          <td><span class="badge bg-primary px-2 py-1">${item.shift1}</span></td>
+          <td><span class="badge bg-info text-dark px-2 py-1">${item.shift2}</span></td>
+          <td><span class="badge bg-danger px-2 py-1">${item.libur}</span></td>
         </tr>
       `);
     });
