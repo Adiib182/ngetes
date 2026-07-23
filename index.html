@@ -5,99 +5,170 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Data Warga</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 400px; margin: auto; }
-    label { font-weight: bold; font-size: 14px; display: block; margin-top: 15px; }
-    input, button { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; }
-    button { background-color: #4CAF50; color: white; border: none; cursor: pointer; font-weight: bold; margin-top: 15px; }
-    button:hover { background-color: #45a049; }
-    #status { margin-top: 15px; font-weight: bold; text-align: center; font-size: 14px; }
+    body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f4f7f6; }
+    .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px;}
+    .anggota-card { background: #fdfdfd; padding: 15px; border: 1px solid #ddd; border-radius: 6px; margin-bottom: 10px; position: relative;}
+    label { font-weight: bold; font-size: 13px; display: block; margin-top: 10px; color: #333; }
+    input, select, button { width: 100%; padding: 10px; margin-top: 5px; box-sizing: border-box; border-radius: 4px; border: 1px solid #ccc; font-size: 14px;}
+    .btn-submit { background-color: #2b5c8f; color: white; border: none; font-weight: bold; margin-top: 20px; font-size: 15px; cursor: pointer;}
+    .btn-submit:hover { background-color: #1e4063; }
+    .btn-submit:disabled { background-color: #999; cursor: not-allowed; }
+    .btn-tambah { background-color: #4CAF50; color: white; border: none; font-weight: bold; margin-bottom: 15px; cursor: pointer;}
+    .btn-hapus { background-color: #f44336; color: white; border: none; padding: 5px 10px; font-size: 12px; position: absolute; right: 10px; top: 10px; width: auto; cursor: pointer;}
+    #status { margin-top: 15px; font-weight: bold; text-align: center; font-size: 14px; padding: 10px; border-radius: 4px; display: none; }
+    hr { border: 0; border-top: 1px solid #eee; margin: 20px 0; }
   </style>
 </head>
 <body>
 
-  <h3 style="text-align: center;">Form Data Warga</h3>
-  
-  <label for="noBlokInput">Nomor Blok / Rumah:</label>
-  <input type="text" id="noBlokInput" placeholder="Contoh: Blok A No. 12" required>
+  <div class="card">
+    <h3 style="text-align: center; margin-top:0; color: #2b5c8f;">Pendataan Kartu Keluarga</h3>
+    
+    <label>Status Hunian:</label>
+    <select id="statusHunianInput" required>
+      <option value="" disabled selected>-- Pilih Status Hunian --</option>
+      <option value="Penghuni Tetap">Milik Sendiri / Penghuni Tetap</option>
+      <option value="Kontrak / Kos">Kontrak / Kos</option>
+    </select>
 
-  <label for="fileInput">Upload File / Foto Kartu Keluarga:</label>
-  <input type="file" id="fileInput" accept="image/*, application/pdf" required>
-  <p style="font-size: 11px; color: gray; margin-top: 2px;">*Format didukung: JPG, PNG, WEBP, PDF.</p>
-  
-  <button id="submitBtn" onclick="uploadFile()">Kirim & Ekstrak Data</button>
-  
-  <div id="status"></div>
+    <label>Nomor Blok / Rumah:</label>
+    <input type="text" id="noBlokInput" placeholder="Contoh: Blok A No. 12" required>
+
+    <label>Nomor Telepon / WhatsApp (Aktif):</label>
+    <input type="number" id="noTelpInput" placeholder="Contoh: 081234567890" required>
+
+    <hr>
+    <h4 style="margin-bottom: 5px; color: #444;">Data Anggota Keluarga</h4>
+    <p style="font-size: 12px; color: #666; margin-top: 0;">Masukkan seluruh anggota yang terdaftar di KK atau yang tinggal di rumah ini.</p>
+    
+    <div id="anggotaContainer">
+      <div class="anggota-card">
+        <label>Status Hubungan:</label>
+        <select class="status-hubungan" required>
+          <option value="Kepala Keluarga" selected>Kepala Keluarga</option>
+          <option value="Istri">Istri</option>
+          <option value="Anak">Anak</option>
+          <option value="Famili Lain / Numpang">Famili Lain / Numpang</option>
+        </select>
+        <label>NIK:</label>
+        <input type="number" class="nik-input" placeholder="Masukkan 16 digit NIK" required>
+        <label>Nama Lengkap:</label>
+        <input type="text" class="nama-input" placeholder="Nama Lengkap" required>
+      </div>
+    </div>
+
+    <button class="btn-tambah" onclick="tambahAnggota()">+ Tambah Anggota Keluarga</button>
+    <hr>
+
+    <label>Upload File / Foto KK:</label>
+    <input type="file" id="fileInput" accept="image/*, application/pdf" required>
+    
+    <button id="submitBtn" class="btn-submit" onclick="uploadData()">Kirim Data Warga</button>
+    
+    <div id="status"></div>
+  </div>
 
   <script>
     // MASUKKAN URL APLIKASI WEB GAS KAMU DI SINI
-    const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbzYxPw5xjNfzJBelYsCmOZyQ2VGwyKFTBuwYV_nXQC6qFFnTtuwczEubUjiBCFgWsy4/exec";
+    const GAS_WEB_APP_URL = "URL_GAS_KAMU_PASTE_DI_SINI";
 
-    function uploadFile() {
+    function tambahAnggota() {
+      const container = document.getElementById('anggotaContainer');
+      const div = document.createElement('div');
+      div.className = 'anggota-card';
+      div.innerHTML = `
+        <button class="btn-hapus" onclick="this.parentElement.remove()">X Hapus</button>
+        <label>Status Hubungan:</label>
+        <select class="status-hubungan" required>
+          <option value="" disabled selected>-- Pilih Status --</option>
+          <option value="Istri">Istri</option>
+          <option value="Anak">Anak</option>
+          <option value="Famili Lain / Numpang">Famili Lain / Numpang</option>
+        </select>
+        <label>NIK:</label>
+        <input type="number" class="nik-input" placeholder="Masukkan 16 digit NIK" required>
+        <label>Nama Lengkap:</label>
+        <input type="text" class="nama-input" placeholder="Nama Lengkap" required>
+      `;
+      container.appendChild(div);
+    }
+
+    function uploadData() {
       var noBlok = document.getElementById('noBlokInput').value;
+      var statusHunian = document.getElementById('statusHunianInput').value;
+      var noTelp = document.getElementById('noTelpInput').value; // Mengambil data No Telp
       var fileInput = document.getElementById('fileInput');
       var file = fileInput.files[0];
-      var statusDiv = document.getElementById('status');
       var btn = document.getElementById('submitBtn');
 
-      if (noBlok.trim() === "") {
-        statusDiv.innerText = "❌ Mohon isi Nomor Blok/Rumah!";
-        statusDiv.style.color = "red";
-        return;
+      var anggotaElements = document.getElementsByClassName('anggota-card');
+      var dataAnggota = [];
+      var adaYangKosong = false;
+
+      for (var i = 0; i < anggotaElements.length; i++) {
+        var status = anggotaElements[i].querySelector('.status-hubungan').value;
+        var nik = anggotaElements[i].querySelector('.nik-input').value;
+        var nama = anggotaElements[i].querySelector('.nama-input').value;
+
+        if (!status || !nik || !nama) {
+          adaYangKosong = true;
+        } else {
+          dataAnggota.push({ statusHubungan: status, nik: nik, nama: nama });
+        }
       }
-      
-      if (!file) {
-        statusDiv.innerText = "❌ Mohon pilih file/foto KK!";
-        statusDiv.style.color = "red";
+
+      // Validasi input ditambah dengan mengecek nomor telepon
+      if (!noBlok || !statusHunian || !noTelp || !file || adaYangKosong || dataAnggota.length === 0) {
+        tampilkanStatus("❌ Mohon lengkapi semua data, nomor telepon, form anggota, dan file KK!", "red", "#ffe6e6");
         return;
       }
 
-      statusDiv.innerText = "⏳ Sedang memproses dokumen... (Bisa butuh 10-20 detik)";
-      statusDiv.style.color = "blue";
-      btn.disabled = true; // Matikan tombol sementara biar nggak diklik 2x
+      tampilkanStatus("⏳ Mengirim data & mengunggah arsip... (Mohon tunggu)", "blue", "#e6f2ff");
+      btn.disabled = true; 
       btn.innerText = "Memproses...";
 
       var reader = new FileReader();
       reader.onloadend = async function() {
-        var base64Data = reader.result;
-        
         var payload = {
-          base64: base64Data,
-          mimeType: file.type,
-          noBlok: noBlok
+          noBlok: noBlok,
+          statusHunian: statusHunian,
+          noTelp: noTelp, // Mengirim data No Telp ke GAS
+          anggotaKeluarga: dataAnggota,
+          base64: reader.result,
+          mimeType: file.type
         };
 
         try {
-          // Mengirim data ke GAS API menggunakan fetch
-          // Kita pakai text/plain untuk menghindari isu CORS Preflight bawaan Google
           let response = await fetch(GAS_WEB_APP_URL, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'text/plain' 
-            },
+            headers: { 'Content-Type': 'text/plain' },
             body: JSON.stringify(payload)
           });
           
           let result = await response.json();
 
           if(result.status === "success") {
-            statusDiv.innerText = "✅ " + result.message;
-            statusDiv.style.color = "green";
-            fileInput.value = ""; 
-            document.getElementById('noBlokInput').value = ""; 
+            tampilkanStatus("✅ " + result.message, "green", "#e6ffe6");
+            setTimeout(() => { location.reload(); }, 3000); 
           } else {
-            statusDiv.innerText = "❌ Gagal: " + result.message;
-            statusDiv.style.color = "red";
+            tampilkanStatus("❌ Gagal: " + result.message, "red", "#ffe6e6");
           }
         } catch (error) {
-          statusDiv.innerText = "❌ Terjadi kendala jaringan: " + error.message;
-          statusDiv.style.color = "red";
+          tampilkanStatus("❌ Terjadi kendala jaringan saat mengirim data.", "red", "#ffe6e6");
         } finally {
           btn.disabled = false;
-          btn.innerText = "Kirim & Ekstrak Data";
+          btn.innerText = "Kirim Data Warga";
         }
       };
-      
       reader.readAsDataURL(file);
+    }
+
+    function tampilkanStatus(pesan, warnaTeks, warnaBackground) {
+      var statusDiv = document.getElementById('status');
+      statusDiv.style.display = "block";
+      statusDiv.innerText = pesan;
+      statusDiv.style.color = warnaTeks;
+      statusDiv.style.backgroundColor = warnaBackground;
     }
   </script>
 
