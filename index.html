@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Data Warga</title>
+  <title>Form Data Warga Dinamis</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f4f7f6; }
     .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px;}
@@ -36,6 +36,9 @@
 
     <label>Nomor Telepon / WhatsApp (Aktif):</label>
     <input type="number" id="noTelpInput" placeholder="Contoh: 081234567890" required>
+
+    <label>Nomor Kartu Keluarga (No KK):</label>
+    <input type="number" id="noKkInput" placeholder="Masukkan 16 digit No KK" required>
 
     <hr>
     <h4 style="margin-bottom: 5px; color: #444;">Data Anggota Keluarga</h4>
@@ -96,7 +99,8 @@
     function uploadData() {
       var noBlok = document.getElementById('noBlokInput').value;
       var statusHunian = document.getElementById('statusHunianInput').value;
-      var noTelp = document.getElementById('noTelpInput').value; // Mengambil data No Telp
+      var noTelp = document.getElementById('noTelpInput').value; 
+      var noKk = document.getElementById('noKkInput').value; // Mengambil data No KK
       var fileInput = document.getElementById('fileInput');
       var file = fileInput.files[0];
       var btn = document.getElementById('submitBtn');
@@ -117,9 +121,9 @@
         }
       }
 
-      // Validasi input ditambah dengan mengecek nomor telepon
-      if (!noBlok || !statusHunian || !noTelp || !file || adaYangKosong || dataAnggota.length === 0) {
-        tampilkanStatus("❌ Mohon lengkapi semua data, nomor telepon, form anggota, dan file KK!", "red", "#ffe6e6");
+      // Validasi input ditambah mengecek No KK
+      if (!noBlok || !statusHunian || !noTelp || !noKk || !file || adaYangKosong || dataAnggota.length === 0) {
+        tampilkanStatus("❌ Mohon lengkapi semua form (termasuk No KK dan Anggota) serta file arsip!", "red", "#ffe6e6");
         return;
       }
 
@@ -132,7 +136,8 @@
         var payload = {
           noBlok: noBlok,
           statusHunian: statusHunian,
-          noTelp: noTelp, // Mengirim data No Telp ke GAS
+          noTelp: noTelp, 
+          noKk: noKk, // Mengirim data No KK ke GAS
           anggotaKeluarga: dataAnggota,
           base64: reader.result,
           mimeType: file.type
