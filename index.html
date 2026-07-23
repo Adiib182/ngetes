@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Form Data Warga</title>
+  <title>Form Data Warga Dinamis</title>
   <style>
     body { font-family: Arial, sans-serif; padding: 20px; max-width: 500px; margin: auto; background-color: #f4f7f6; }
     .card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); margin-bottom: 20px;}
@@ -24,51 +24,58 @@
   <div class="card">
     <h3 style="text-align: center; margin-top:0; color: #2b5c8f;">Pendataan Kartu Keluarga</h3>
     
-    <label>Status Hunian:</label>
-    <select id="statusHunianInput" required>
-      <option value="" disabled selected>-- Pilih Status Hunian --</option>
-      <option value="Penghuni Tetap">Milik Sendiri / Penghuni Tetap</option>
-      <option value="Kontrak / Kos">Kontrak / Kos</option>
-    </select>
+    <!-- DIBUNGKUS DENGAN TAG FORM -->
+    <form id="formWarga" onsubmit="uploadData(event)">
+      
+      <label>Status Hunian:</label>
+      <select id="statusHunianInput" required>
+        <option value="" disabled selected>-- Pilih Status Hunian --</option>
+        <option value="Penghuni Tetap">Milik Sendiri / Penghuni Tetap</option>
+        <option value="Kontrak / Kos">Kontrak / Kos</option>
+      </select>
 
-    <label>Nomor Blok / Rumah:</label>
-    <input type="text" id="noBlokInput" placeholder="Contoh: Blok A No. 12" required>
+      <label>Nomor Blok / Rumah:</label>
+      <input type="text" id="noBlokInput" placeholder="Contoh: Blok A No. 12" required>
 
-    <label>Nomor Telepon / WhatsApp (Aktif):</label>
-    <input type="number" id="noTelpInput" placeholder="Contoh: 081234567890" required>
+      <label>Nomor Telepon / WhatsApp (Aktif):</label>
+      <input type="number" id="noTelpInput" placeholder="Contoh: 081234567890" required>
 
-    <label>Nomor Kartu Keluarga (No KK):</label>
-    <input type="number" id="noKkInput" placeholder="Masukkan 16 digit No KK" required>
+      <label>Nomor Kartu Keluarga (No KK):</label>
+      <input type="number" id="noKkInput" placeholder="Masukkan 16 digit No KK" required>
 
-    <hr>
-    <h4 style="margin-bottom: 5px; color: #444;">Data Anggota Keluarga</h4>
-    <p style="font-size: 12px; color: #666; margin-top: 0;">Masukkan seluruh anggota yang terdaftar di KK atau yang tinggal di rumah ini.</p>
-    
-    <div id="anggotaContainer">
-      <div class="anggota-card">
-        <label>Status Hubungan:</label>
-        <select class="status-hubungan" required>
-          <option value="Kepala Keluarga" selected>Kepala Keluarga</option>
-          <option value="Istri">Istri</option>
-          <option value="Anak">Anak</option>
-          <option value="Famili Lain / Numpang">Famili Lain / Numpang</option>
-        </select>
-        <label>NIK:</label>
-        <input type="number" class="nik-input" placeholder="Masukkan 16 digit NIK" required>
-        <label>Nama Lengkap:</label>
-        <input type="text" class="nama-input" placeholder="Nama Lengkap" required>
+      <hr>
+      <h4 style="margin-bottom: 5px; color: #444;">Data Anggota Keluarga</h4>
+      <p style="font-size: 12px; color: #666; margin-top: 0;">Masukkan seluruh anggota yang terdaftar di KK atau yang tinggal di rumah ini.</p>
+      
+      <div id="anggotaContainer">
+        <div class="anggota-card">
+          <label>Status Hubungan:</label>
+          <select class="status-hubungan" required>
+            <option value="Kepala Keluarga" selected>Kepala Keluarga</option>
+            <option value="Istri">Istri</option>
+            <option value="Anak">Anak</option>
+            <option value="Famili Lain / Numpang">Famili Lain / Numpang</option>
+          </select>
+          <label>NIK:</label>
+          <input type="number" class="nik-input" placeholder="Masukkan 16 digit NIK" required>
+          <label>Nama Lengkap:</label>
+          <input type="text" class="nama-input" placeholder="Nama Lengkap" required>
+        </div>
       </div>
-    </div>
 
-    <button class="btn-tambah" onclick="tambahAnggota()">+ Tambah Anggota Keluarga</button>
-    <hr>
+      <!-- Tombol ini tidak pakai validasi browser bawaan karena tipenya button biasa -->
+      <button type="button" class="btn-tambah" onclick="tambahAnggota()">+ Tambah Anggota Keluarga</button>
+      <hr>
 
-    <label>Upload File / Foto KK:</label>
-    <input type="file" id="fileInput" accept="image/*, application/pdf" required>
-    
-    <button id="submitBtn" class="btn-submit" onclick="uploadData()">Kirim Data Warga</button>
-    
-    <div id="status"></div>
+      <label>Upload File / Foto KK:</label>
+      <input type="file" id="fileInput" accept="image/*, application/pdf" required>
+      
+      <!-- TOMBOL SUBMIT RESMI -->
+      <button type="submit" id="submitBtn" class="btn-submit">Kirim Data Warga</button>
+      
+      <div id="status"></div>
+      
+    </form>
   </div>
 
   <script>
@@ -80,7 +87,7 @@
       const div = document.createElement('div');
       div.className = 'anggota-card';
       div.innerHTML = `
-        <button class="btn-hapus" onclick="this.parentElement.remove()">X Hapus</button>
+        <button type="button" class="btn-hapus" onclick="this.parentElement.remove()">X Hapus</button>
         <label>Status Hubungan:</label>
         <select class="status-hubungan" required>
           <option value="" disabled selected>-- Pilih Status --</option>
@@ -96,35 +103,27 @@
       container.appendChild(div);
     }
 
-    function uploadData() {
+    function uploadData(event) {
+      // MENCEGAH HALAMAN REFRESH OTOMATIS SAAT TOMBOL SUBMIT DITEKAN
+      event.preventDefault(); 
+
       var noBlok = document.getElementById('noBlokInput').value;
       var statusHunian = document.getElementById('statusHunianInput').value;
       var noTelp = document.getElementById('noTelpInput').value; 
-      var noKk = document.getElementById('noKkInput').value; // Mengambil data No KK
+      var noKk = document.getElementById('noKkInput').value;
       var fileInput = document.getElementById('fileInput');
       var file = fileInput.files[0];
       var btn = document.getElementById('submitBtn');
 
       var anggotaElements = document.getElementsByClassName('anggota-card');
       var dataAnggota = [];
-      var adaYangKosong = false;
 
       for (var i = 0; i < anggotaElements.length; i++) {
         var status = anggotaElements[i].querySelector('.status-hubungan').value;
         var nik = anggotaElements[i].querySelector('.nik-input').value;
         var nama = anggotaElements[i].querySelector('.nama-input').value;
-
-        if (!status || !nik || !nama) {
-          adaYangKosong = true;
-        } else {
-          dataAnggota.push({ statusHubungan: status, nik: nik, nama: nama });
-        }
-      }
-
-      // Validasi input ditambah mengecek No KK
-      if (!noBlok || !statusHunian || !noTelp || !noKk || !file || adaYangKosong || dataAnggota.length === 0) {
-        tampilkanStatus("❌ Mohon lengkapi semua form (termasuk No KK dan Anggota) serta file arsip!", "red", "#ffe6e6");
-        return;
+        
+        dataAnggota.push({ statusHubungan: status, nik: nik, nama: nama });
       }
 
       tampilkanStatus("⏳ Mengirim data & mengunggah arsip... (Mohon tunggu)", "blue", "#e6f2ff");
@@ -137,7 +136,7 @@
           noBlok: noBlok,
           statusHunian: statusHunian,
           noTelp: noTelp, 
-          noKk: noKk, // Mengirim data No KK ke GAS
+          noKk: noKk, 
           anggotaKeluarga: dataAnggota,
           base64: reader.result,
           mimeType: file.type
