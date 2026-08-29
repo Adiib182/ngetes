@@ -157,7 +157,7 @@
             <!-- GAMBAR QRIS BISA DIKLIK (Fitur Zoom Ditambahkan di Sini) -->
             <div @click="showZoomQris = true" class="bg-white p-2 rounded-xl border-2 border-dashed border-emerald-300 mb-6 inline-block cursor-pointer hover:border-emerald-500 hover:bg-emerald-50 transition group" title="Klik untuk memperbesar gambar">
                 <!-- Tambahkan properti object-contain agar gambar pas di kotak -->
-                <img :src="https://i.ibb.co.com/kVSHQnGv/Whats-App-Image-2026-08-29-at-21-14-54.jpg" alt="QRIS Titik Pulang" class="w-48 h-48 object-contain mx-auto rounded-lg shadow-sm transition transform group-hover:scale-105">
+                <img :src="linkGambarQris" alt="QRIS Titik Pulang" class="w-48 h-48 object-contain mx-auto rounded-lg shadow-sm transition transform group-hover:scale-105">
                 <p class="text-xs text-emerald-600 mt-2 font-bold"><i class="fa-solid fa-magnifying-glass-plus mr-1"></i>Klik untuk perbesar</p>
             </div>
             
@@ -177,7 +177,7 @@
         <div @click.away="showZoomQris = false" class="relative max-w-lg w-full mx-4 flex flex-col items-center">
             <!-- Menampilkan gambar yang sama dengan ukuran maksimal -->
             <div class="bg-white p-4 md:p-6 rounded-2xl shadow-2xl w-full flex justify-center">
-                <img :src="https://i.ibb.co.com/kVSHQnGv/Whats-App-Image-2026-08-29-at-21-14-54.jpg" alt="QRIS Zoom" class="w-full max-w-sm h-auto object-contain rounded-xl">
+                <img :src="linkGambarQris" alt="QRIS Zoom" class="w-full max-w-sm h-auto object-contain rounded-xl">
             </div>
             <p class="text-white/80 mt-6 font-bold text-lg text-center flex items-center gap-2"><i class="fa-solid fa-scan text-emerald-400"></i> Scan QRIS untuk Berdonasi</p>
         </div>
@@ -219,7 +219,7 @@
     </div>
 
     <script>
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycby77uGoDCNX3ZTp74y-uZ_Vao_ZnPIdc6pS61j0ifkcXc8fMj-3aPR12V4ys7-tsuwiqA/exec'; // GANTI DENGAN URL DEPLOYMENT BARU GAS ANDA
+        const GAS_URL = 'URL_GAS_ANDA_DISINI'; // GANTI DENGAN URL DEPLOYMENT BARU GAS ANDA
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('financeApp', () => ({
