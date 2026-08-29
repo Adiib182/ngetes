@@ -5,11 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistem Keuangan Cluster Titik Pulang</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js untuk state management modern -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
-    <!-- SweetAlert2 untuk popup profesional -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <!-- Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
@@ -37,11 +34,27 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
+        <!-- HEADER & FILTER BULAN -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Ringkasan Laporan Kas</h2>
+            
+            <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-2 cursor-pointer hover:border-indigo-300 transition">
+                <i class="fa-solid fa-calendar-days text-indigo-500 mr-3"></i>
+                <select x-model="selectedPeriode" @change="fetchData()" class="bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer pr-4 appearance-none">
+                    <option value="Semua">Semua Riwayat Waktu</option>
+                    <template x-for="p in listPeriode" :key="p">
+                        <option :value="p" x-text="formatNamaBulan(p)"></option>
+                    </template>
+                </select>
+                <i class="fa-solid fa-chevron-down text-gray-400 text-xs pointer-events-none"></i>
+            </div>
+        </div>
+
         <!-- Summary Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1">Saldo Kas Saat Ini</p>
+                    <p class="text-sm text-gray-500 font-semibold mb-1">Saldo Kas Saat Ini (Total)</p>
                     <h3 class="text-3xl font-bold text-indigo-900" x-text="formatRp(saldo)">Rp 0</h3>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl">
@@ -50,7 +63,7 @@
             </div>
             <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1">Total Pemasukan</p>
+                    <p class="text-sm text-gray-500 font-semibold mb-1" x-text="'Masuk (' + formatNamaBulan(selectedPeriode) + ')'"></p>
                     <h3 class="text-2xl font-bold text-green-600" x-text="formatRp(masuk)">Rp 0</h3>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl">
@@ -59,7 +72,7 @@
             </div>
             <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1">Total Pengeluaran</p>
+                    <p class="text-sm text-gray-500 font-semibold mb-1" x-text="'Keluar (' + formatNamaBulan(selectedPeriode) + ')'"></p>
                     <h3 class="text-2xl font-bold text-red-600" x-text="formatRp(keluar)">Rp 0</h3>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl">
@@ -91,11 +104,14 @@
                     </thead>
                     <tbody class="divide-y divide-gray-100 text-sm">
                         <template x-if="isLoading">
-                            <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-indigo-500"></i><br>Sinkronisasi Data...</td></tr>
+                            <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-indigo-500"></i><br>Menyaring Data...</td></tr>
+                        </template>
+                        <template x-if="!isLoading && transactions.length === 0">
+                            <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">Tidak ada transaksi di periode ini.</td></tr>
                         </template>
                         <template x-for="item in transactions" :key="item.id">
                             <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 text-gray-500" x-text="item.tanggal"></td>
+                                <td class="px-6 py-4 text-gray-500 font-medium" x-text="item.tanggal"></td>
                                 <td class="px-6 py-4 font-medium text-gray-900" x-text="item.keterangan"></td>
                                 <td class="px-6 py-4 text-center">
                                     <span :class="item.tipe === 'Masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-bold" x-text="item.tipe"></span>
@@ -113,19 +129,17 @@
         </div>
     </main>
 
-    <!-- Modal Login -->
+    <!-- Modal Login (Hidden) -->
     <div x-show="showLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" style="display: none;">
-        <div @click.away="showLogin = false" class="bg-white rounded-xl shadow-2xl p-8 w-96 transform transition-all">
+        <div @click.away="showLogin = false" class="bg-white rounded-xl shadow-2xl p-8 w-96">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Otorisasi Admin</h2>
-            <input type="text" x-model="loginData.user" placeholder="Username" class="w-full border-gray-300 rounded-lg shadow-sm p-3 mb-4 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50">
-            <input type="password" x-model="loginData.pass" placeholder="Password" class="w-full border-gray-300 rounded-lg shadow-sm p-3 mb-6 focus:ring-indigo-500 focus:border-indigo-500 bg-gray-50">
-            <button @click="login()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">
-                Masuk Sistem
-            </button>
+            <input type="text" x-model="loginData.user" placeholder="Username" class="w-full border-gray-300 rounded-lg shadow-sm p-3 mb-4 focus:ring-indigo-500 bg-gray-50">
+            <input type="password" x-model="loginData.pass" placeholder="Password" class="w-full border-gray-300 rounded-lg shadow-sm p-3 mb-6 focus:ring-indigo-500 bg-gray-50">
+            <button @click="login()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">Masuk Sistem</button>
         </div>
     </div>
 
-    <!-- Modal Form Transaksi -->
+    <!-- Modal Form (Hidden) -->
     <div x-show="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
             <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-3" x-text="formMode === 'add' ? 'Catat Transaksi Baru' : 'Edit Transaksi'"></h2>
@@ -150,24 +164,48 @@
     </div>
 
     <script>
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycby77uGoDCNX3ZTp74y-uZ_Vao_ZnPIdc6pS61j0ifkcXc8fMj-3aPR12V4ys7-tsuwiqA/exec'; // GANTI DENGAN URL WEB APP DEPLOYMENT BARU
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycby77uGoDCNX3ZTp74y-uZ_Vao_ZnPIdc6pS61j0ifkcXc8fMj-3aPR12V4ys7-tsuwiqA/exec'; // GANTI DENGAN URL DEPLOYMENT BARU
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('financeApp', () => ({
                 transactions: [], saldo: 0, masuk: 0, keluar: 0,
+                listPeriode: [], selectedPeriode: 'Semua', // State untuk filter bulan
                 isLoading: true, isAdmin: false, showLogin: false, showForm: false, formMode: 'add',
                 loginData: { user: '', pass: '' },
                 formData: { id: '', tanggal: '', tipe: 'Masuk', keterangan: '', nominal: '' },
 
                 formatRp(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); },
+                
+                // Konversi "2026-08" menjadi "Agustus 2026"
+                formatNamaBulan(yyyyMm) {
+                    if(!yyyyMm || yyyyMm === 'Semua') return 'Semua Riwayat';
+                    const [year, month] = yyyyMm.split('-');
+                    const bulanIndo = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni', 'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
+                    return `${bulanIndo[parseInt(month, 10) - 1]} ${year}`;
+                },
 
                 async fetchData() {
                     this.isLoading = true;
+                    this.transactions = []; // kosongkan agar loading UI terlihat
                     try {
-                        let res = await fetch(GAS_URL);
+                        // Mengirimkan periode yang dipilih ke server
+                        let res = await fetch(`${GAS_URL}?periode=${this.selectedPeriode}`);
                         let data = await res.json();
-                        this.transactions = data.data; this.saldo = data.saldo; this.masuk = data.masuk; this.keluar = data.keluar;
-                    } catch (e) { Swal.fire('Koneksi Gagal', 'Gagal memuat data dari server.', 'error'); }
+                        
+                        this.transactions = data.data; 
+                        this.saldo = data.saldo; 
+                        this.masuk = data.masuk; 
+                        this.keluar = data.keluar;
+                        this.listPeriode = data.list_periode;
+                        
+                        // Jika dropdown bulan kosong (awal muat), arahkan ke bulan terbaru
+                        if (this.selectedPeriode === 'Semua' && this.listPeriode.length > 0 && !this.initialLoadDone) {
+                            this.selectedPeriode = this.listPeriode[0];
+                            this.initialLoadDone = true;
+                            this.fetchData(); // Muat ulang dengan bulan spesifik
+                            return;
+                        }
+                    } catch (e) { Swal.fire('Koneksi Gagal', 'Gagal memuat data.', 'error'); }
                     this.isLoading = false;
                 },
 
@@ -193,7 +231,8 @@
                 openFormModal(mode, item = null) {
                     this.formMode = mode;
                     if(mode === 'edit' && item) {
-                        this.formData = { id: item.id, tanggal: item.tanggal, tipe: item.tipe, keterangan: item.keterangan, nominal: item.nominal };
+                        // Gunakan rawTanggal (YYYY-MM-DD) khusus untuk kotak input HTML 
+                        this.formData = { id: item.id, tanggal: item.rawTanggal, tipe: item.tipe, keterangan: item.keterangan, nominal: item.nominal };
                     } else {
                         let today = new Date().toISOString().split('T')[0];
                         this.formData = { id: '', tanggal: today, tipe: 'Masuk', keterangan: '', nominal: '' };
@@ -203,9 +242,8 @@
 
                 async submitForm() {
                     if(!this.formData.keterangan || !this.formData.nominal) return Swal.fire('Peringatan', 'Lengkapi form!', 'warning');
-                    let payload = { action: this.formMode, ...this.formData };
-                    let success = await this.apiPost(payload);
-                    if(success) this.showForm = false;
+                    let success = await this.apiPost({ action: this.formMode, ...this.formData });
+                    if(success) { this.showForm = false; }
                 },
 
                 deleteData(id) {
