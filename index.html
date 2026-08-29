@@ -16,7 +16,6 @@
 </head>
 <body x-data="financeApp()" x-init="fetchData()" class="text-gray-800">
 
-    <!-- Top Navigation -->
     <nav class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
             <div class="flex items-center gap-3">
@@ -34,13 +33,13 @@
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <!-- HEADER & FILTER BULAN -->
         <div class="flex flex-col md:flex-row justify-between items-center mb-6">
             <h2 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Ringkasan Laporan Kas</h2>
             
             <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-2 cursor-pointer hover:border-indigo-300 transition">
                 <i class="fa-solid fa-calendar-days text-indigo-500 mr-3"></i>
-                <select x-model="selectedPeriode" @change="fetchData()" class="bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer pr-4 appearance-none">
+                <!-- Saat ganti bulan, kembalikan ke halaman 1 -->
+                <select x-model="selectedPeriode" @change="currentPage = 1; fetchData()" class="bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer pr-4 appearance-none">
                     <option value="Semua">Semua Riwayat Waktu</option>
                     <template x-for="p in listPeriode" :key="p">
                         <option :value="p" x-text="formatNamaBulan(p)"></option>
@@ -50,38 +49,30 @@
             </div>
         </div>
 
-        <!-- Summary Dashboard -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1">Saldo Kas Saat Ini (Total)</p>
+                    <p class="text-sm text-gray-500 font-semibold mb-1">Saldo Kas Saat Ini</p>
                     <h3 class="text-3xl font-bold text-indigo-900" x-text="formatRp(saldo)">Rp 0</h3>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl">
-                    <i class="fa-solid fa-building-columns"></i>
-                </div>
+                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl"><i class="fa-solid fa-building-columns"></i></div>
             </div>
             <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-semibold mb-1" x-text="'Masuk (' + formatNamaBulan(selectedPeriode) + ')'"></p>
                     <h3 class="text-2xl font-bold text-green-600" x-text="formatRp(masuk)">Rp 0</h3>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl">
-                    <i class="fa-solid fa-arrow-trend-up"></i>
-                </div>
+                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl"><i class="fa-solid fa-arrow-trend-up"></i></div>
             </div>
             <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
                 <div>
                     <p class="text-sm text-gray-500 font-semibold mb-1" x-text="'Keluar (' + formatNamaBulan(selectedPeriode) + ')'"></p>
                     <h3 class="text-2xl font-bold text-red-600" x-text="formatRp(keluar)">Rp 0</h3>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl">
-                    <i class="fa-solid fa-arrow-trend-down"></i>
-                </div>
+                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl"><i class="fa-solid fa-arrow-trend-down"></i></div>
             </div>
         </div>
 
-        <!-- Admin Toolbar -->
         <div x-show="isAdmin" x-transition class="mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
             <div class="text-indigo-800 font-semibold"><i class="fa-solid fa-shield-halved mr-2"></i>Mode Administrator Aktif</div>
             <button @click="openFormModal('add')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition">
@@ -89,7 +80,6 @@
             </button>
         </div>
 
-        <!-- Data Table -->
         <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full whitespace-nowrap">
@@ -126,10 +116,31 @@
                     </tbody>
                 </table>
             </div>
+
+            <!-- CONTROLS PAGINATION -->
+            <div x-show="totalPages > 1 && !isLoading" class="bg-gray-50 px-6 py-4 border-t flex items-center justify-between">
+                <span class="text-sm text-gray-600">
+                    Menampilkan Halaman <span class="font-bold" x-text="currentPage"></span> dari <span class="font-bold" x-text="totalPages"></span> 
+                    (Total: <span x-text="totalItems"></span> transaksi)
+                </span>
+                <div class="flex gap-2">
+                    <button @click="gantiHalaman(currentPage - 1)" :disabled="currentPage === 1" 
+                            class="px-4 py-2 border rounded-md text-sm font-semibold transition"
+                            :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-indigo-600 hover:bg-indigo-50 border-indigo-200'">
+                        <i class="fa-solid fa-chevron-left mr-1"></i> Prev
+                    </button>
+                    <button @click="gantiHalaman(currentPage + 1)" :disabled="currentPage === totalPages" 
+                            class="px-4 py-2 border rounded-md text-sm font-semibold transition"
+                            :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-indigo-600 hover:bg-indigo-50 border-indigo-200'">
+                        Next <i class="fa-solid fa-chevron-right ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </main>
 
-    <!-- Modal Login (Hidden) -->
+    <!-- Modal Login -->
     <div x-show="showLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" style="display: none;">
         <div @click.away="showLogin = false" class="bg-white rounded-xl shadow-2xl p-8 w-96">
             <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Otorisasi Admin</h2>
@@ -139,7 +150,7 @@
         </div>
     </div>
 
-    <!-- Modal Form (Hidden) -->
+    <!-- Modal Form -->
     <div x-show="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" style="display: none;">
         <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
             <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-3" x-text="formMode === 'add' ? 'Catat Transaksi Baru' : 'Edit Transaksi'"></h2>
@@ -153,8 +164,12 @@
                 </select></div>
                 <div><label class="block text-sm font-semibold text-gray-600 mb-1">Keterangan / Uraian</label>
                 <input type="text" x-model="formData.keterangan" class="w-full border p-2.5 rounded-lg bg-gray-50" placeholder="Contoh: Iuran Warga Blok A"></div>
-                <div><label class="block text-sm font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
-                <input type="number" x-model="formData.nominal" class="w-full border p-2.5 rounded-lg bg-gray-50" placeholder="Tanpa titik/koma"></div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
+                    <!-- Input text untuk tampilan format ribuan (1.500.000) -->
+                    <input type="text" x-model="displayNominal" @input="formatInputNominal()" class="w-full border p-2.5 rounded-lg bg-gray-50 font-bold" placeholder="Contoh: 150.000">
+                </div>
             </div>
             <div class="mt-8 flex justify-end gap-3">
                 <button @click="showForm = false" class="px-5 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 font-semibold transition">Batal</button>
@@ -164,19 +179,23 @@
     </div>
 
     <script>
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycby77uGoDCNX3ZTp74y-uZ_Vao_ZnPIdc6pS61j0ifkcXc8fMj-3aPR12V4ys7-tsuwiqA/exec'; // GANTI DENGAN URL DEPLOYMENT BARU
+        const GAS_URL = 'URL_GAS_ANDA_DISINI'; // GANTI DENGAN URL DEPLOYMENT BARU
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('financeApp', () => ({
                 transactions: [], saldo: 0, masuk: 0, keluar: 0,
-                listPeriode: [], selectedPeriode: 'Semua', // State untuk filter bulan
+                listPeriode: [], selectedPeriode: 'Semua', 
+                
+                // Variabel untuk Pagination
+                currentPage: 1, totalPages: 1, totalItems: 0,
+                
                 isLoading: true, isAdmin: false, showLogin: false, showForm: false, formMode: 'add',
                 loginData: { user: '', pass: '' },
-                formData: { id: '', tanggal: '', tipe: 'Masuk', keterangan: '', nominal: '' },
+                formData: { id: '', tanggal: '', tipe: 'Masuk', keterangan: '', nominal: 0 },
+                displayNominal: '', // Untuk tampilan input admin (1.500.000)
 
                 formatRp(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); },
                 
-                // Konversi "2026-08" menjadi "Agustus 2026"
                 formatNamaBulan(yyyyMm) {
                     if(!yyyyMm || yyyyMm === 'Semua') return 'Semua Riwayat';
                     const [year, month] = yyyyMm.split('-');
@@ -184,12 +203,27 @@
                     return `${bulanIndo[parseInt(month, 10) - 1]} ${year}`;
                 },
 
+                // Logika Pemisah Ribuan Saat Admin Mengetik
+                formatInputNominal() {
+                    // Hilangkan semua karakter selain angka
+                    let rawValue = this.displayNominal.replace(/[^0-9]/g, '');
+                    if (!rawValue) {
+                        this.displayNominal = '';
+                        this.formData.nominal = 0;
+                        return;
+                    }
+                    // Simpan angka murni ke formData untuk dikirim ke database
+                    this.formData.nominal = parseInt(rawValue, 10);
+                    // Tampilkan format ribuan dengan titik (contoh: 1.500.000)
+                    this.displayNominal = new Intl.NumberFormat('id-ID').format(this.formData.nominal);
+                },
+
                 async fetchData() {
                     this.isLoading = true;
-                    this.transactions = []; // kosongkan agar loading UI terlihat
+                    this.transactions = []; 
                     try {
-                        // Mengirimkan periode yang dipilih ke server
-                        let res = await fetch(`${GAS_URL}?periode=${this.selectedPeriode}`);
+                        // Kirim periode dan nomor halaman ke GAS
+                        let res = await fetch(`${GAS_URL}?periode=${this.selectedPeriode}&page=${this.currentPage}`);
                         let data = await res.json();
                         
                         this.transactions = data.data; 
@@ -198,15 +232,27 @@
                         this.keluar = data.keluar;
                         this.listPeriode = data.list_periode;
                         
-                        // Jika dropdown bulan kosong (awal muat), arahkan ke bulan terbaru
+                        // Set data pagination dari backend
+                        this.currentPage = data.pagination.currentPage;
+                        this.totalPages = data.pagination.totalPages;
+                        this.totalItems = data.pagination.totalItems;
+
                         if (this.selectedPeriode === 'Semua' && this.listPeriode.length > 0 && !this.initialLoadDone) {
                             this.selectedPeriode = this.listPeriode[0];
                             this.initialLoadDone = true;
-                            this.fetchData(); // Muat ulang dengan bulan spesifik
+                            this.currentPage = 1; // Paksa ke halaman 1 saat awal ganti bulan
+                            this.fetchData(); 
                             return;
                         }
                     } catch (e) { Swal.fire('Koneksi Gagal', 'Gagal memuat data.', 'error'); }
                     this.isLoading = false;
+                },
+
+                gantiHalaman(newPage) {
+                    if (newPage >= 1 && newPage <= this.totalPages) {
+                        this.currentPage = newPage;
+                        this.fetchData();
+                    }
                 },
 
                 async apiPost(payload) {
@@ -226,22 +272,24 @@
                     if(success) { this.isAdmin = true; this.showLogin = false; this.loginData.pass = ''; }
                 },
 
-                logout() { this.isAdmin = false; Swal.fire('Logout Berhasil', 'Sesi admin diakhiri', 'info'); },
+                logout() { this.isAdmin = false; this.currentPage = 1; this.fetchData(); Swal.fire('Logout Berhasil', 'Sesi admin diakhiri', 'info'); },
 
                 openFormModal(mode, item = null) {
                     this.formMode = mode;
                     if(mode === 'edit' && item) {
-                        // Gunakan rawTanggal (YYYY-MM-DD) khusus untuk kotak input HTML 
                         this.formData = { id: item.id, tanggal: item.rawTanggal, tipe: item.tipe, keterangan: item.keterangan, nominal: item.nominal };
+                        // Format untuk tampilan saat modal edit dibuka
+                        this.displayNominal = new Intl.NumberFormat('id-ID').format(item.nominal);
                     } else {
                         let today = new Date().toISOString().split('T')[0];
-                        this.formData = { id: '', tanggal: today, tipe: 'Masuk', keterangan: '', nominal: '' };
+                        this.formData = { id: '', tanggal: today, tipe: 'Masuk', keterangan: '', nominal: 0 };
+                        this.displayNominal = '';
                     }
                     this.showForm = true;
                 },
 
                 async submitForm() {
-                    if(!this.formData.keterangan || !this.formData.nominal) return Swal.fire('Peringatan', 'Lengkapi form!', 'warning');
+                    if(!this.formData.keterangan || this.formData.nominal <= 0) return Swal.fire('Peringatan', 'Lengkapi form dan pastikan nominal lebih dari 0!', 'warning');
                     let success = await this.apiPost({ action: this.formMode, ...this.formData });
                     if(success) { this.showForm = false; }
                 },
