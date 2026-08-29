@@ -3,113 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Keuangan Cluster Titik Pulang</title>
+    <title>Dana Sosial & Infaq - Cluster Titik Pulang</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap');
-        body { font-family: 'Inter', sans-serif; background-color: #f3f4f6; }
-        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700;800&display=swap');
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); }
+        .gradient-text { background: linear-gradient(to right, #059669, #0d9488); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
     </style>
 </head>
-<body x-data="financeApp()" x-init="fetchData()" class="text-gray-800">
+<body x-data="financeApp()" x-init="fetchData()" class="text-slate-800">
 
-    <nav class="bg-indigo-900 text-white shadow-lg sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-16 items-center">
+    <!-- Top Navigation -->
+    <nav class="bg-white shadow-sm sticky top-0 z-40 border-b border-emerald-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between h-20 items-center">
             <div class="flex items-center gap-3">
-                <i class="fa-solid fa-wallet text-2xl text-indigo-400"></i>
-                <span class="font-bold text-xl tracking-tight">Titik Pulang Finance</span>
+                <div class="w-10 h-10 rounded-full bg-emerald-100 flex items-center justify-center text-emerald-600 text-xl">
+                    <i class="fa-solid fa-hand-holding-heart"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-xl tracking-tight text-slate-800">Sosial & Infaq</h1>
+                    <p class="text-xs text-emerald-600 font-semibold">Cluster Titik Pulang</p>
+                </div>
             </div>
-            <button x-show="!isAdmin" @click="showLogin = true" class="bg-indigo-700 hover:bg-indigo-600 px-4 py-2 rounded-md text-sm font-semibold transition">
-                <i class="fa-solid fa-lock mr-2"></i>Admin Login
-            </button>
-            <button x-show="isAdmin" @click="logout()" class="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md text-sm font-semibold transition">
-                <i class="fa-solid fa-sign-out-alt mr-2"></i>Logout
-            </button>
+            <div class="flex items-center gap-3">
+                <!-- Tombol Donasi QRIS untuk Warga -->
+                <button @click="showQris = true" class="bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2.5 rounded-full text-sm font-bold shadow-md shadow-emerald-200 transition flex items-center gap-2">
+                    <i class="fa-solid fa-qrcode"></i> Salurkan Donasi
+                </button>
+                <!-- Tombol Admin -->
+                <button x-show="!isAdmin" @click="showLogin = true" class="text-slate-500 hover:text-emerald-600 px-3 py-2 text-xl transition">
+                    <i class="fa-solid fa-circle-user"></i>
+                </button>
+                <button x-show="isAdmin" @click="logout()" class="text-red-500 hover:text-red-700 px-3 py-2 text-xl transition" title="Logout">
+                    <i class="fa-solid fa-sign-out-alt"></i>
+                </button>
+            </div>
         </div>
     </nav>
 
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
-        <div class="flex flex-col md:flex-row justify-between items-center mb-6">
-            <h2 class="text-xl font-bold text-gray-800 mb-3 md:mb-0">Ringkasan Laporan Kas</h2>
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+            <h2 class="text-2xl font-extrabold text-slate-800 mb-4 md:mb-0">Transparansi <span class="gradient-text">Baitul Maal</span></h2>
             
-            <div class="flex items-center bg-white border border-gray-200 rounded-lg shadow-sm px-4 py-2 cursor-pointer hover:border-indigo-300 transition">
-                <i class="fa-solid fa-calendar-days text-indigo-500 mr-3"></i>
-                <!-- Saat ganti bulan, kembalikan ke halaman 1 -->
-                <select x-model="selectedPeriode" @change="currentPage = 1; fetchData()" class="bg-transparent text-sm font-semibold text-gray-700 outline-none cursor-pointer pr-4 appearance-none">
+            <div class="flex items-center bg-white border border-emerald-100 rounded-full shadow-sm px-5 py-2.5 cursor-pointer hover:border-emerald-300 transition">
+                <i class="fa-regular fa-calendar text-emerald-500 mr-3"></i>
+                <select x-model="selectedPeriode" @change="currentPage = 1; fetchData()" class="bg-transparent text-sm font-bold text-slate-700 outline-none cursor-pointer pr-4 appearance-none">
                     <option value="Semua">Semua Riwayat Waktu</option>
                     <template x-for="p in listPeriode" :key="p">
                         <option :value="p" x-text="formatNamaBulan(p)"></option>
                     </template>
                 </select>
-                <i class="fa-solid fa-chevron-down text-gray-400 text-xs pointer-events-none"></i>
+                <i class="fa-solid fa-chevron-down text-slate-400 text-xs pointer-events-none"></i>
             </div>
         </div>
 
+        <!-- Summary Dashboard (Nuansa Emerald) -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
-                <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1">Saldo Kas Saat Ini</p>
-                    <h3 class="text-3xl font-bold text-indigo-900" x-text="formatRp(saldo)">Rp 0</h3>
+            <!-- Saldo Utama -->
+            <div class="bg-gradient-to-br from-emerald-600 to-teal-700 p-6 rounded-2xl shadow-lg shadow-emerald-200 flex items-center justify-between text-white relative overflow-hidden">
+                <div class="relative z-10">
+                    <p class="text-emerald-100 text-sm font-semibold mb-1">Total Saldo Tersedia</p>
+                    <h3 class="text-3xl font-bold" x-text="formatRp(saldo)">Rp 0</h3>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-indigo-100 flex items-center justify-center text-indigo-600 text-xl"><i class="fa-solid fa-building-columns"></i></div>
+                <div class="relative z-10 w-14 h-14 rounded-full bg-white/20 flex items-center justify-center text-white text-2xl backdrop-blur-sm">
+                    <i class="fa-solid fa-vault"></i>
+                </div>
+                <!-- Elemen dekoratif -->
+                <i class="fa-solid fa-leaf absolute -bottom-4 -right-4 text-7xl text-white opacity-10"></i>
             </div>
-            <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+            
+            <!-- Penerimaan -->
+            <div class="glass p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1" x-text="'Masuk (' + formatNamaBulan(selectedPeriode) + ')'"></p>
-                    <h3 class="text-2xl font-bold text-green-600" x-text="formatRp(masuk)">Rp 0</h3>
+                    <p class="text-sm text-slate-500 font-semibold mb-1" x-text="'Penerimaan (' + formatNamaBulan(selectedPeriode) + ')'"></p>
+                    <h3 class="text-2xl font-bold text-teal-600" x-text="formatRp(masuk)">Rp 0</h3>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center text-green-600 text-xl"><i class="fa-solid fa-arrow-trend-up"></i></div>
+                <div class="w-12 h-12 rounded-full bg-teal-50 flex items-center justify-center text-teal-500 text-xl"><i class="fa-solid fa-hand-holding-dollar"></i></div>
             </div>
-            <div class="glass p-6 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between">
+
+            <!-- Penyaluran -->
+            <div class="glass p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-gray-500 font-semibold mb-1" x-text="'Keluar (' + formatNamaBulan(selectedPeriode) + ')'"></p>
-                    <h3 class="text-2xl font-bold text-red-600" x-text="formatRp(keluar)">Rp 0</h3>
+                    <p class="text-sm text-slate-500 font-semibold mb-1" x-text="'Penyaluran (' + formatNamaBulan(selectedPeriode) + ')'"></p>
+                    <h3 class="text-2xl font-bold text-amber-500" x-text="formatRp(keluar)">Rp 0</h3>
                 </div>
-                <div class="w-12 h-12 rounded-full bg-red-100 flex items-center justify-center text-red-600 text-xl"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 text-xl"><i class="fa-solid fa-parachute-box"></i></div>
             </div>
         </div>
 
-        <div x-show="isAdmin" x-transition class="mb-6 flex justify-between items-center bg-white p-4 rounded-xl shadow-sm border border-indigo-100">
-            <div class="text-indigo-800 font-semibold"><i class="fa-solid fa-shield-halved mr-2"></i>Mode Administrator Aktif</div>
-            <button @click="openFormModal('add')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition">
-                <i class="fa-solid fa-plus mr-2"></i>Catat Transaksi Baru
+        <div x-show="isAdmin" x-transition class="mb-6 flex justify-between items-center bg-teal-50 p-4 rounded-xl border border-teal-100">
+            <div class="text-teal-800 font-semibold"><i class="fa-solid fa-shield-check mr-2"></i>Mode Administrator Aktif</div>
+            <button @click="openFormModal('add')" class="bg-teal-600 hover:bg-teal-700 text-white px-5 py-2.5 rounded-lg text-sm font-bold shadow-md transition">
+                <i class="fa-solid fa-plus mr-2"></i>Input Mutasi Baru
             </button>
         </div>
 
-        <div class="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full whitespace-nowrap">
-                    <thead class="bg-gray-50 text-gray-600 text-xs uppercase font-semibold text-left">
+                    <thead class="bg-slate-50 text-slate-500 text-xs uppercase font-bold text-left tracking-wider">
                         <tr>
                             <th class="px-6 py-4 border-b">Tanggal</th>
-                            <th class="px-6 py-4 border-b">Keterangan</th>
-                            <th class="px-6 py-4 border-b text-center">Tipe</th>
+                            <th class="px-6 py-4 border-b">Uraian / Keterangan</th>
+                            <th class="px-6 py-4 border-b text-center">Jenis Mutasi</th>
                             <th class="px-6 py-4 border-b text-right">Nominal</th>
                             <th x-show="isAdmin" class="px-6 py-4 border-b text-center">Aksi</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-gray-100 text-sm">
+                    <tbody class="divide-y divide-slate-100 text-sm">
                         <template x-if="isLoading">
-                            <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400"><i class="fa-solid fa-circle-notch fa-spin text-3xl mb-3 text-indigo-500"></i><br>Menyaring Data...</td></tr>
+                            <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400"><i class="fa-solid fa-spinner fa-spin text-3xl mb-3 text-emerald-500"></i><br>Menarik riwayat data...</td></tr>
                         </template>
                         <template x-if="!isLoading && transactions.length === 0">
-                            <tr><td colspan="5" class="px-6 py-10 text-center text-gray-400">Tidak ada transaksi di periode ini.</td></tr>
+                            <tr><td colspan="5" class="px-6 py-12 text-center text-slate-400"><i class="fa-regular fa-folder-open text-3xl mb-3"></i><br>Belum ada catatan mutasi di periode ini.</td></tr>
                         </template>
                         <template x-for="item in transactions" :key="item.id">
-                            <tr class="hover:bg-gray-50 transition">
-                                <td class="px-6 py-4 text-gray-500 font-medium" x-text="item.tanggal"></td>
-                                <td class="px-6 py-4 font-medium text-gray-900" x-text="item.keterangan"></td>
+                            <tr class="hover:bg-slate-50 transition">
+                                <td class="px-6 py-4 text-slate-500 font-medium" x-text="item.tanggal"></td>
+                                <td class="px-6 py-4 font-bold text-slate-700" x-text="item.keterangan"></td>
                                 <td class="px-6 py-4 text-center">
-                                    <span :class="item.tipe === 'Masuk' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'" class="px-3 py-1 rounded-full text-xs font-bold" x-text="item.tipe"></span>
+                                    <span :class="item.tipe === 'Masuk' ? 'bg-teal-100 text-teal-700' : 'bg-amber-100 text-amber-700'" class="px-3 py-1.5 rounded-md text-xs font-bold" x-text="item.tipe === 'Masuk' ? 'Penerimaan' : 'Penyaluran'"></span>
                                 </td>
-                                <td class="px-6 py-4 text-right font-bold text-gray-700" x-text="formatRp(item.nominal)"></td>
+                                <td class="px-6 py-4 text-right font-bold text-slate-800" x-text="formatRp(item.nominal)"></td>
                                 <td x-show="isAdmin" class="px-6 py-4 text-center">
-                                    <button @click="openFormModal('edit', item)" class="text-blue-500 hover:text-blue-700 mx-2 bg-blue-50 p-2 rounded-lg"><i class="fa-solid fa-pen"></i></button>
-                                    <button @click="deleteData(item.id)" class="text-red-500 hover:text-red-700 mx-2 bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
+                                    <button @click="openFormModal('edit', item)" class="text-blue-500 hover:text-blue-700 mx-1 bg-blue-50 p-2 rounded-lg"><i class="fa-solid fa-pen"></i></button>
+                                    <button @click="deleteData(item.id)" class="text-red-500 hover:text-red-700 mx-1 bg-red-50 p-2 rounded-lg"><i class="fa-solid fa-trash"></i></button>
                                 </td>
                             </tr>
                         </template>
@@ -117,82 +140,101 @@
                 </table>
             </div>
 
-            <!-- CONTROLS PAGINATION -->
-            <div x-show="totalPages > 1 && !isLoading" class="bg-gray-50 px-6 py-4 border-t flex items-center justify-between">
-                <span class="text-sm text-gray-600">
-                    Menampilkan Halaman <span class="font-bold" x-text="currentPage"></span> dari <span class="font-bold" x-text="totalPages"></span> 
-                    (Total: <span x-text="totalItems"></span> transaksi)
+            <!-- Pagination -->
+            <div x-show="totalPages > 1 && !isLoading" class="bg-white px-6 py-4 flex items-center justify-between border-t border-slate-100">
+                <span class="text-sm text-slate-500 font-medium">
+                    Halaman <span class="font-bold text-slate-800" x-text="currentPage"></span> dari <span class="font-bold text-slate-800" x-text="totalPages"></span> 
                 </span>
                 <div class="flex gap-2">
                     <button @click="gantiHalaman(currentPage - 1)" :disabled="currentPage === 1" 
-                            class="px-4 py-2 border rounded-md text-sm font-semibold transition"
-                            :class="currentPage === 1 ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-indigo-600 hover:bg-indigo-50 border-indigo-200'">
+                            class="px-4 py-2 rounded-lg text-sm font-bold transition"
+                            :class="currentPage === 1 ? 'bg-slate-50 text-slate-300 cursor-not-allowed' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'">
                         <i class="fa-solid fa-chevron-left mr-1"></i> Prev
                     </button>
                     <button @click="gantiHalaman(currentPage + 1)" :disabled="currentPage === totalPages" 
-                            class="px-4 py-2 border rounded-md text-sm font-semibold transition"
-                            :class="currentPage === totalPages ? 'bg-gray-100 text-gray-400 cursor-not-allowed' : 'bg-white text-indigo-600 hover:bg-indigo-50 border-indigo-200'">
+                            class="px-4 py-2 rounded-lg text-sm font-bold transition"
+                            :class="currentPage === totalPages ? 'bg-slate-50 text-slate-300 cursor-not-allowed' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-100'">
                         Next <i class="fa-solid fa-chevron-right ml-1"></i>
                     </button>
                 </div>
             </div>
-
         </div>
     </main>
 
-    <!-- Modal Login -->
-    <div x-show="showLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" style="display: none;">
-        <div @click.away="showLogin = false" class="bg-white rounded-xl shadow-2xl p-8 w-96">
-            <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Otorisasi Admin</h2>
-            <input type="text" x-model="loginData.user" placeholder="Username" class="w-full border-gray-300 rounded-lg shadow-sm p-3 mb-4 focus:ring-indigo-500 bg-gray-50">
-            <input type="password" x-model="loginData.pass" placeholder="Password" class="w-full border-gray-300 rounded-lg shadow-sm p-3 mb-6 focus:ring-indigo-500 bg-gray-50">
-            <button @click="login()" class="w-full bg-indigo-600 text-white font-bold py-3 rounded-lg hover:bg-indigo-700 transition">Masuk Sistem</button>
+    <!-- MODAL QRIS (FITUR BARU) -->
+    <div x-show="showQris" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm" style="display: none;" x-transition>
+        <div @click.away="showQris = false" class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm text-center relative overflow-hidden">
+            <!-- Tombol Tutup -->
+            <button @click="showQris = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4">
+                <i class="fa-solid fa-hand-holding-heart"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-slate-800 mb-1">Mari Berinfaq</h2>
+            <p class="text-sm text-slate-500 mb-6 font-medium">Scan QRIS di bawah menggunakan aplikasi perbankan atau e-wallet Anda.</p>
+            
+            <!-- GAMBAR QRIS (GANTI SRC DENGAN LINK FOTO QRIS ANDA) -->
+            <div class="bg-slate-50 p-4 rounded-xl border-2 border-dashed border-emerald-200 mb-6 inline-block">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=ContohQRIS_Ganti_Dengan_Gambar_Asli" alt="QRIS Titik Pulang" class="w-48 h-48 mx-auto rounded-lg shadow-sm">
+            </div>
+            
+            <div class="bg-emerald-50 p-3 rounded-lg text-left">
+                <p class="text-xs text-emerald-800 font-semibold">Atas Nama:</p>
+                <p class="text-sm font-bold text-emerald-900">Kas Cluster Titik Pulang</p>
+                <p class="text-xs text-emerald-600 mt-1">*Berapapun nominalnya sangat berharga.</p>
+            </div>
         </div>
     </div>
 
-    <!-- Modal Form -->
-    <div x-show="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm" style="display: none;">
-        <div class="bg-white rounded-xl shadow-2xl p-8 w-full max-w-md">
-            <h2 class="text-xl font-bold text-gray-800 mb-6 border-b pb-3" x-text="formMode === 'add' ? 'Catat Transaksi Baru' : 'Edit Transaksi'"></h2>
+    <!-- Modal Login -->
+    <div x-show="showLogin" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm" style="display: none;" x-transition>
+        <div @click.away="showLogin = false" class="bg-white rounded-2xl shadow-2xl p-8 w-96 relative">
+            <button @click="showLogin = false" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            <h2 class="text-2xl font-bold text-slate-800 mb-6 text-center">Login Pengurus</h2>
+            <input type="text" x-model="loginData.user" placeholder="Username" class="w-full border-slate-200 rounded-xl shadow-sm p-3.5 mb-4 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50 font-medium">
+            <input type="password" x-model="loginData.pass" placeholder="Password" class="w-full border-slate-200 rounded-xl shadow-sm p-3.5 mb-6 focus:ring-emerald-500 focus:border-emerald-500 bg-slate-50 font-medium">
+            <button @click="login()" class="w-full bg-emerald-600 text-white font-bold py-3.5 rounded-xl hover:bg-emerald-700 shadow-md shadow-emerald-200 transition">Masuk Sistem</button>
+        </div>
+    </div>
+
+    <!-- Modal Form Transaksi -->
+    <div x-show="showForm" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm" style="display: none;" x-transition>
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md relative">
+            <h2 class="text-xl font-bold text-slate-800 mb-6 border-b border-slate-100 pb-4" x-text="formMode === 'add' ? 'Catat Mutasi Baru' : 'Edit Mutasi'"></h2>
             <div class="space-y-4">
-                <div><label class="block text-sm font-semibold text-gray-600 mb-1">Tanggal</label>
-                <input type="date" x-model="formData.tanggal" class="w-full border p-2.5 rounded-lg bg-gray-50"></div>
-                <div><label class="block text-sm font-semibold text-gray-600 mb-1">Tipe Mutasi</label>
-                <select x-model="formData.tipe" class="w-full border p-2.5 rounded-lg bg-gray-50">
-                    <option value="Masuk">Pemasukan (Kredit)</option>
-                    <option value="Keluar">Pengeluaran (Debit)</option>
+                <div><label class="block text-sm font-bold text-slate-600 mb-1">Tanggal Mutasi</label>
+                <input type="date" x-model="formData.tanggal" class="w-full border-slate-200 p-3 rounded-xl bg-slate-50 font-medium"></div>
+                <div><label class="block text-sm font-bold text-slate-600 mb-1">Jenis Mutasi</label>
+                <select x-model="formData.tipe" class="w-full border-slate-200 p-3 rounded-xl bg-slate-50 font-medium">
+                    <option value="Masuk">Penerimaan (Infaq/Sosial)</option>
+                    <option value="Keluar">Penyaluran (Pengeluaran)</option>
                 </select></div>
-                <div><label class="block text-sm font-semibold text-gray-600 mb-1">Keterangan / Uraian</label>
-                <input type="text" x-model="formData.keterangan" class="w-full border p-2.5 rounded-lg bg-gray-50" placeholder="Contoh: Iuran Warga Blok A"></div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-gray-600 mb-1">Nominal (Rp)</label>
-                    <!-- Input text untuk tampilan format ribuan (1.500.000) -->
-                    <input type="text" x-model="displayNominal" @input="formatInputNominal()" class="w-full border p-2.5 rounded-lg bg-gray-50 font-bold" placeholder="Contoh: 150.000">
-                </div>
+                <div><label class="block text-sm font-bold text-slate-600 mb-1">Uraian / Keterangan</label>
+                <input type="text" x-model="formData.keterangan" class="w-full border-slate-200 p-3 rounded-xl bg-slate-50 font-medium" placeholder="Contoh: Infaq Hamba Allah"></div>
+                <div><label class="block text-sm font-bold text-slate-600 mb-1">Nominal (Rp)</label>
+                <input type="text" x-model="displayNominal" @input="formatInputNominal()" class="w-full border-slate-200 p-3 rounded-xl bg-slate-50 font-bold text-lg text-emerald-700" placeholder="Contoh: 150.000"></div>
             </div>
             <div class="mt-8 flex justify-end gap-3">
-                <button @click="showForm = false" class="px-5 py-2.5 rounded-lg text-gray-600 hover:bg-gray-100 font-semibold transition">Batal</button>
-                <button @click="submitForm()" class="px-5 py-2.5 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 font-bold shadow-md transition">Simpan Data</button>
+                <button @click="showForm = false" class="px-5 py-3 rounded-xl text-slate-500 hover:bg-slate-100 font-bold transition">Batal</button>
+                <button @click="submitForm()" class="px-5 py-3 rounded-xl bg-teal-600 text-white hover:bg-teal-700 font-bold shadow-md shadow-teal-200 transition">Simpan Data</button>
             </div>
         </div>
     </div>
 
     <script>
-        const GAS_URL = 'https://script.google.com/macros/s/AKfycby77uGoDCNX3ZTp74y-uZ_Vao_ZnPIdc6pS61j0ifkcXc8fMj-3aPR12V4ys7-tsuwiqA/exec'; // GANTI DENGAN URL DEPLOYMENT BARU
+        const GAS_URL = 'https://script.google.com/macros/s/AKfycby77uGoDCNX3ZTp74y-uZ_Vao_ZnPIdc6pS61j0ifkcXc8fMj-3aPR12V4ys7-tsuwiqA/exec'; // GANTI DENGAN URL DEPLOYMENT BARU GAS ANDA
 
         document.addEventListener('alpine:init', () => {
             Alpine.data('financeApp', () => ({
                 transactions: [], saldo: 0, masuk: 0, keluar: 0,
                 listPeriode: [], selectedPeriode: 'Semua', 
-                
-                // Variabel untuk Pagination
                 currentPage: 1, totalPages: 1, totalItems: 0,
-                
-                isLoading: true, isAdmin: false, showLogin: false, showForm: false, formMode: 'add',
+                isLoading: true, isAdmin: false, showLogin: false, showForm: false, 
+                showQris: false, // State untuk modal QRIS
+                formMode: 'add',
                 loginData: { user: '', pass: '' },
                 formData: { id: '', tanggal: '', tipe: 'Masuk', keterangan: '', nominal: 0 },
-                displayNominal: '', // Untuk tampilan input admin (1.500.000)
+                displayNominal: '',
 
                 formatRp(angka) { return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(angka); },
                 
@@ -203,67 +245,43 @@
                     return `${bulanIndo[parseInt(month, 10) - 1]} ${year}`;
                 },
 
-                // Logika Pemisah Ribuan Saat Admin Mengetik
                 formatInputNominal() {
-                    // Hilangkan semua karakter selain angka
                     let rawValue = this.displayNominal.replace(/[^0-9]/g, '');
-                    if (!rawValue) {
-                        this.displayNominal = '';
-                        this.formData.nominal = 0;
-                        return;
-                    }
-                    // Simpan angka murni ke formData untuk dikirim ke database
+                    if (!rawValue) { this.displayNominal = ''; this.formData.nominal = 0; return; }
                     this.formData.nominal = parseInt(rawValue, 10);
-                    // Tampilkan format ribuan dengan titik (contoh: 1.500.000)
                     this.displayNominal = new Intl.NumberFormat('id-ID').format(this.formData.nominal);
                 },
 
                 async fetchData() {
-                    this.isLoading = true;
-                    this.transactions = []; 
+                    this.isLoading = true; this.transactions = []; 
                     try {
-                        // Kirim periode dan nomor halaman ke GAS
                         let res = await fetch(`${GAS_URL}?periode=${this.selectedPeriode}&page=${this.currentPage}`);
                         let data = await res.json();
                         
-                        this.transactions = data.data; 
-                        this.saldo = data.saldo; 
-                        this.masuk = data.masuk; 
-                        this.keluar = data.keluar;
+                        this.transactions = data.data; this.saldo = data.saldo; 
+                        this.masuk = data.masuk; this.keluar = data.keluar;
                         this.listPeriode = data.list_periode;
-                        
-                        // Set data pagination dari backend
                         this.currentPage = data.pagination.currentPage;
                         this.totalPages = data.pagination.totalPages;
-                        this.totalItems = data.pagination.totalItems;
 
                         if (this.selectedPeriode === 'Semua' && this.listPeriode.length > 0 && !this.initialLoadDone) {
                             this.selectedPeriode = this.listPeriode[0];
-                            this.initialLoadDone = true;
-                            this.currentPage = 1; // Paksa ke halaman 1 saat awal ganti bulan
-                            this.fetchData(); 
-                            return;
+                            this.initialLoadDone = true; this.currentPage = 1; 
+                            this.fetchData(); return;
                         }
                     } catch (e) { Swal.fire('Koneksi Gagal', 'Gagal memuat data.', 'error'); }
                     this.isLoading = false;
                 },
 
-                gantiHalaman(newPage) {
-                    if (newPage >= 1 && newPage <= this.totalPages) {
-                        this.currentPage = newPage;
-                        this.fetchData();
-                    }
-                },
+                gantiHalaman(newPage) { if (newPage >= 1 && newPage <= this.totalPages) { this.currentPage = newPage; this.fetchData(); } },
 
                 async apiPost(payload) {
-                    Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() } });
+                    Swal.fire({ title: 'Memproses...', allowOutsideClick: false, didOpen: () => { Swal.showLoading() }, customClass: { popup: 'rounded-2xl' } });
                     try {
                         let res = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(payload) });
                         let result = await res.json();
-                        if(result.status === 'success') {
-                            Swal.fire('Berhasil!', result.message, 'success');
-                            this.fetchData(); return true;
-                        } else { Swal.fire('Error', result.message, 'error'); return false; }
+                        if(result.status === 'success') { Swal.fire({title:'Berhasil!', text:result.message, icon:'success', customClass:{popup:'rounded-2xl'}}); this.fetchData(); return true; } 
+                        else { Swal.fire({title:'Error', text:result.message, icon:'error', customClass:{popup:'rounded-2xl'}}); return false; }
                     } catch (e) { Swal.fire('Error', 'Gagal menghubungi server.', 'error'); return false; }
                 },
 
@@ -272,13 +290,12 @@
                     if(success) { this.isAdmin = true; this.showLogin = false; this.loginData.pass = ''; }
                 },
 
-                logout() { this.isAdmin = false; this.currentPage = 1; this.fetchData(); Swal.fire('Logout Berhasil', 'Sesi admin diakhiri', 'info'); },
+                logout() { this.isAdmin = false; this.currentPage = 1; this.fetchData(); Swal.fire({title:'Logout Berhasil', icon:'info', customClass:{popup:'rounded-2xl'}}); },
 
                 openFormModal(mode, item = null) {
                     this.formMode = mode;
                     if(mode === 'edit' && item) {
                         this.formData = { id: item.id, tanggal: item.rawTanggal, tipe: item.tipe, keterangan: item.keterangan, nominal: item.nominal };
-                        // Format untuk tampilan saat modal edit dibuka
                         this.displayNominal = new Intl.NumberFormat('id-ID').format(item.nominal);
                     } else {
                         let today = new Date().toISOString().split('T')[0];
@@ -289,16 +306,14 @@
                 },
 
                 async submitForm() {
-                    if(!this.formData.keterangan || this.formData.nominal <= 0) return Swal.fire('Peringatan', 'Lengkapi form dan pastikan nominal lebih dari 0!', 'warning');
+                    if(!this.formData.keterangan || this.formData.nominal <= 0) return Swal.fire('Peringatan', 'Lengkapi form!', 'warning');
                     let success = await this.apiPost({ action: this.formMode, ...this.formData });
                     if(success) { this.showForm = false; }
                 },
 
                 deleteData(id) {
-                    Swal.fire({ title: 'Hapus Transaksi?', text: "Data ini tidak bisa dikembalikan!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#d33', cancelButtonColor: '#3085d6', confirmButtonText: 'Ya, Hapus!'
-                    }).then(async (result) => {
-                        if (result.isConfirmed) await this.apiPost({ action: 'delete', id: id });
-                    });
+                    Swal.fire({ title: 'Hapus Catatan?', text: "Data ini akan dihapus permanen!", icon: 'warning', showCancelButton: true, confirmButtonColor: '#0d9488', cancelButtonColor: '#ef4444', confirmButtonText: 'Ya, Hapus!', customClass:{popup:'rounded-2xl'}
+                    }).then(async (result) => { if (result.isConfirmed) await this.apiPost({ action: 'delete', id: id }); });
                 }
             }))
         })
